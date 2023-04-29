@@ -72,50 +72,45 @@ X = {}
 for i in N:
     for k in K:
         for o in O:
-            X[i, k, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_{}_{}_{}".format(i,k,o))
+            X[i, k, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_{}_{}_{}".format(i,k,o))
 for k in K:
     for j in M:
         for o in O:
-            X[k, j, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_{}_{}_{}".format(k, j, o))
+            X[k, j, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_{}_{}_{}".format(k, j, o))
 for i in N:
     for j in M:
         for o in O:
-            X[i, j, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_{}_{}_{}".format(i, j, o))
+            X[i, j, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_{}_{}_{}".format(i, j, o))
     
 
 # Definição da função objetivo
 
 # Função objetivo de custo do transporte
-f1 = gp.quicksum(cr * D[i, k] * X[i, k, o] for i in N for k in K for o in O) + gp.quicksum(cf * D[k, j] * X[k, j, o] for k in K for j in M for o in O)
+f1 = gp.quicksum(cr * D[i, k] * b[o] * X[i, k, o] for i in N for k in K for o in O) + gp.quicksum(cf * D[k, j] * b[o] * X[k, j, o] for k in K for j in M for o in O)
 
 # # Função objetivo de minimização de emissão de CO2
-f2 = gp.quicksum(er * D[i, k] * X[i, k, o] for i in N for k in K for o in O) + gp.quicksum(ef * D[k, j] * X[k, j, o] for j in M for k in K for o in O)
-
-# m.setObjective(f1, gp.GRB.MINIMIZE)
+f2 = gp.quicksum(er * D[i, k] * b[o] * X[i, k, o] for i in N for k in K for o in O) + gp.quicksum(ef * D[k, j] * b[o] * X[k, j, o] for j in M for k in K for o in O)
 
 m.setObjectiveN(f1, 0, priority=2, name="Custo do transporte")
 m.setObjectiveN(f2, 1, priority=1, name="Emissão do transporte")
 
 # Oferta dos produtores:
 for i in N:
-    m.addConstr(gp.quicksum(X[i, k, o] for k in K for o in O) <= a[i], "Oferta_Prod_{}".format(i))
-
-# Demanda dos clientes:
-for o in O:
-    m.addConstr(gp.quicksum(X[k, j, o] for k in K for j in M) == b[o], "Demanda_Cli_{}".format(o))
+    m.addConstr(gp.quicksum(X[i, k, o] * b[o] for k in K for o in O) <= a[i], "Oferta_Prod_{}".format(i))
 
 # Capacidade dos pontos ferroviários
 for k in K:
-    m.addConstr(gp.quicksum(X[i, k, o] for i in N for o in O) <= CF[k], "Cap_Ferro_{}".format(k))
+    m.addConstr(gp.quicksum(X[i, k, o] * b[o] for i in N for o in O) <= CF[k], "Cap_Ferro_{}".format(k))
 
 # Capacidade dos portos de navio
 for j in M:
-    m.addConstr(gp.quicksum(X[k, j, o] for k in K for o in O) <= CP[j], "Cap_Porto_{}".format(j))
+    m.addConstr(gp.quicksum(X[k, j, o] * b[o] for k in K for o in O) <= CP[j], "Cap_Porto_{}".format(j))
 
-# Igualdade das quantidades
-for k in K:
-    for o in O:
-        m.addConstr(gp.quicksum(X[i, k, o] for i in N) == gp.quicksum(X[k, j, o] for j in M), "Igualdade_{}".format(k))
+for o in O:
+    m.addConstr(gp.quicksum(X[i, k, o] for i in N for k in K) == 1)
+                    
+for o in O:
+    m.addConstr(gp.quicksum(X[k, j, o] for k in K for j in M) == 1)
 
 # Atualização do modelo com novas variáveis
 m.update()
@@ -124,3 +119,5 @@ m.update()
 m.optimize()
 
 m.write("out.sol")
+
+breakpoint()
