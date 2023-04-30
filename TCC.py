@@ -7,19 +7,19 @@ import random
 N = [1, 2, 3]
 
 # Conjunto de portos de navios destinos (M)
-M = [6, 7, 8]
+M = [6, 7, 8, 9]
 
 # Conjunto de pontos ferroviários (K)
 K = [4, 5]
 
 # Conjunto de clientes (O)
-O = [9]
+O = [10]
 
 # Capacidade máxima do porto ferroviário (CF(k))
 CF = {4: 80, 5: 3000}
 
 # Capacidade máxima do porto de navio (CP(j))
-CP = {6: 50, 7: 9000, 8: 9000}
+CP = {6: 50, 7: 9000, 8: 9000, 9: 9000}
 
 # Custo do transporte rodoviário
 cr = 0.50
@@ -37,10 +37,10 @@ er = 0.6
 ef = 0.1
 
 # Oferta de cada armazém produtor (em toneladas)
-a = {1: 100, 2: 500, 3: 700}
+a = {1: 9000, 2: 500, 3: 700}
 
 # Demanda de cada cliente (em toneladas)
-b = {9: 100}
+b = {10: 100}
 
 # Distância em km entre cada par de locais (armazéns, portos e clientes)
 D = {}
@@ -50,7 +50,6 @@ def prepare_data():
     with open('HAHA.txt') as file:
         for line in file:
             nodes.append(line.split())
-    
     for i in range(len(nodes)):
         for j in range(len(nodes)):
             if i != j:
@@ -81,36 +80,52 @@ for i in N:
     for j in M:
         for o in O:
             X[i, j, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_{}_{}_{}".format(i, j, o))
-    
+
+y1 = m.addVar(vtype=gp.GRB.BINARY, name="y1")
+y2 = m.addVar(vtype=gp.GRB.BINARY, name="y2")
 
 # Definição da função objetivo
-
 # Função objetivo de custo do transporte
-f1 = gp.quicksum(cr * D[i, k] * b[o] * X[i, k, o] for i in N for k in K for o in O) + gp.quicksum(cf * D[k, j] * b[o] * X[k, j, o] for k in K for j in M for o in O)
+f1 = gp.quicksum(cr * D[i, k] * b[o] * X[i, k, o] for i in N for k in K for o in O) + \
+     gp.quicksum(cf * D[k, j] * b[o] * X[k, j, o] for k in K for j in M for o in O) + \
+     gp.quicksum(ci * b[o] * X[k, j, o] for k in K for j in M for o in O) + \
+     gp.quicksum(cr * D[i, j] * b[o] * X[i, j, o] for i in N for j in M for o in O)
+       
+# Função objetivo de minimização de emissão de CO2
+f2 = gp.quicksum(er * D[i, k] * b[o] * X[i, k, o] for i in N for k in K for o in O) + \
+     gp.quicksum(ef * D[k, j] * b[o] * X[k, j, o] for j in M for k in K for o in O) + \
+     gp.quicksum(er * D[i, j] * b[o] * X[i, j, o] for i in N for j in M for o in O)
 
-# # Função objetivo de minimização de emissão de CO2
-f2 = gp.quicksum(er * D[i, k] * b[o] * X[i, k, o] for i in N for k in K for o in O) + gp.quicksum(ef * D[k, j] * b[o] * X[k, j, o] for j in M for k in K for o in O)
-
+# m.setObjective(f1, gp.GRB.MINIMIZE)
 m.setObjectiveN(f1, 0, priority=2, name="Custo do transporte")
 m.setObjectiveN(f2, 1, priority=1, name="Emissão do transporte")
 
 # Oferta dos produtores:
 for i in N:
-    m.addConstr(gp.quicksum(X[i, k, o] * b[o] for k in K for o in O) <= a[i], "Oferta_Prod_{}".format(i))
+    m.addConstr(gp.quicksum(X[i, k, o] * b[o] for k in K for o in O) <= a[i] * y1, "Oferta_Prod_{}".format(i))
+
+for i in N:
+    m.addConstr(gp.quicksum(X[i, j, o] * b[o] for j in M for o in O) <= a[i] * y2, "Oferta_Prod_{}".format(i))
 
 # Capacidade dos pontos ferroviários
 for k in K:
-    m.addConstr(gp.quicksum(X[i, k, o] * b[o] for i in N for o in O) <= CF[k], "Cap_Ferro_{}".format(k))
+    m.addConstr(gp.quicksum(X[i, k, o] * b[o] for i in N for o in O) <= CF[k] * y1, "Cap_Ferro_{}".format(k))
 
 # Capacidade dos portos de navio
 for j in M:
-    m.addConstr(gp.quicksum(X[k, j, o] * b[o] for k in K for o in O) <= CP[j], "Cap_Porto_{}".format(j))
+    m.addConstr(gp.quicksum(X[k, j, o] * b[o] for k in K for o in O) <= CP[j] * y1, "Cap_Porto_{}".format(j))
 
 for o in O:
-    m.addConstr(gp.quicksum(X[i, k, o] for i in N for k in K) == 1)
+    m.addConstr(gp.quicksum(X[i, k, o] for i in N for k in K) == 1 * y1)
                     
 for o in O:
-    m.addConstr(gp.quicksum(X[k, j, o] for k in K for j in M) == 1)
+    m.addConstr(gp.quicksum(X[k, j, o] for k in K for j in M) == 1 * y1)
+
+for o in O:
+    m.addConstr(gp.quicksum(X[i, j, o] for i in N for j in M) == 1 * y2)
+
+# Restrição que exige que escolha seja 0 ou 1
+m.addConstr(y1 + y2 == 1, "escolha")
 
 # Atualização do modelo com novas variáveis
 m.update()
