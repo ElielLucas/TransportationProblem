@@ -142,8 +142,7 @@ def get_cost(points_orig, n, points_dest, m):
 
 def savetocsv(filename, mat):
     arr = np.array([np.array(xi) for xi in mat])
-    print(arr)
-    pd.DataFrame(arr).to_csv("./" + filename + ".csv", header=None, index=None)
+    pd.DataFrame(arr).to_csv("./dados/" + filename + ".csv", index=None)
 
 
 def main():
@@ -156,10 +155,10 @@ def main():
                             lim_y_down=-100, lim_y_up=100, n=orig)
     
     points_transbordo = get_point(lim_x_left=-250, lim_x_right=250,
-                            lim_y_down=-250, lim_y_up=250, n=orig)
+                            lim_y_down=-250, lim_y_up=250, n=trans)
     
     points_porto = get_point(lim_x_left=-1000, lim_x_right=1000,
-                            lim_y_down=-1000, lim_y_up=1000, n=orig)
+                            lim_y_down=-1000, lim_y_up=1000, n=port)
     
     cost_orig_trans = get_cost(points_orig=points_orig, n=orig, points_dest=points_transbordo, m=trans)
     cost_transbordo_porto = get_cost(points_orig=points_transbordo, n=trans, points_dest=points_porto, m=port)
@@ -180,21 +179,21 @@ def main():
             supply[i] += (sum_demmand - sum_supply) // orig
         supply[0] += (sum_demmand - sum_supply) % orig
     aux = np.array(supply)
-    pd.DataFrame(aux).to_csv("./supply.csv", header=None, index=None)
+    pd.DataFrame(aux).to_csv("./dados/supply.csv", index=None)
     
     t = SystemRandom().randint(1, trans)
     for _ in range(t):
         cap_trans[SystemRandom().randint(1, trans) - 1] = sum_demmand
     aux = np.array(cap_trans)
-    pd.DataFrame(aux).to_csv("./cap_transbordo.csv", header=None, index=None)
+    pd.DataFrame(aux).to_csv("./dados/cap_transbordo.csv", index=None)
 
     t = SystemRandom().randint(1, port)
     for _ in range(t):
         cap_porto[SystemRandom().randint(1, port) - 1] = sum_demmand
     aux = np.array(cap_porto)
-    pd.DataFrame(aux).to_csv("./cap_porto.csv", header=None, index=None)
+    pd.DataFrame(aux).to_csv("./dados/cap_porto.csv", index=None)
     
-    pd.DataFrame(demmand).to_csv("./cap_porto.csv", header=None, index=None)
+    pd.DataFrame(demmand).to_csv("./dados/demand.csv", index=None)
 
 
 if __name__ == "__main__":

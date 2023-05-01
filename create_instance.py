@@ -9,10 +9,10 @@ er = round(random.uniform(0.2, 0.9), 2)
 while (ef:=round(random.uniform(0.1, 0.9), 2)) >= er: pass
 
 
-N = list(range(1, 200))
+N = list(range(1, 50))
 K = list(range(len(N), len(N) + 50))
-M = list(range(len(N + K), len(N + K) + 100))
-O = list(range(1, 150))
+M = list(range(len(N + K), len(N + K) + 20))
+O = list(range(1, 10))
 
 pontos = N + K + M
 
