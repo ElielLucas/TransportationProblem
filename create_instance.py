@@ -7,11 +7,12 @@ while (ci:=round(random.uniform(0.1, 0.9), 2)) >= cr: pass
 while (ci:=round(random.uniform(0.1, 0.9), 2)) >= cf: pass
 er = round(random.uniform(0.2, 0.9), 2)
 while (ef:=round(random.uniform(0.1, 0.9), 2)) >= er: pass
-    
-N = list(range(1, 101))
+
+
+N = list(range(1, 200))
 K = list(range(len(N), len(N) + 50))
 M = list(range(len(N + K), len(N + K) + 100))
-O = list(range(1, 21))
+O = list(range(1, 150))
 
 pontos = N + K + M
 
