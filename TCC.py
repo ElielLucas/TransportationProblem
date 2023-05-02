@@ -1,7 +1,7 @@
 import gurobipy as gp
 import numpy as np
 import math
-from random import SystemRandom
+import random
 import pandas as pd
 from utils import gen_points
 
@@ -52,18 +52,26 @@ M = list(range(0, port))
 O = list(range(0, cli))
 
 # Demanda de cada cliente (em toneladas)
-demmand = [SystemRandom().randint(1, 10000) for _ in range(cli)]
+demmand = {}
+for o in O:
+    demmand[o] = random.randint(1, 5000)
 
 # Oferta de cada armazém produtor (em toneladas)
-supply = [sum(demmand) if SystemRandom().random() <= 0.3 else SystemRandom().randint(100, 100000) for _ in range(orig)]
-
+supply = {}
+for i in N:
+    supply[i] = sum(demmand.values()) if random.random() <= 0.3 else random.randint(100, 100000)
+    
 # Capacidade máxima do porto ferroviário (CF(k))
-CF = [sum(demmand) if SystemRandom().random() <= 0.3 else SystemRandom().randint(500, 5000) for _ in K]
+CF = {}
+for k in K:
+    CF[k] = sum(demmand.values()) if random.random() <= 0.3 else random.randint(500, 5000)
 
 # Capacidade máxima do porto de navio (CP(j))
-CP =[sum(demmand) if SystemRandom().random() <= 0.3 else SystemRandom().randint(1000, 5000) for _ in M]
+CP = {}
+for j in M:
+    CP[j] = sum(demmand.values()) if random.random() <= 0.3 else random.randint(1000, 5000)
 
-# breakpoint()
+
 # Criação do modelo
 m = gp.Model("Transporte com Transbordo")
 
