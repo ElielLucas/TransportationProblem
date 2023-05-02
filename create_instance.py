@@ -31,9 +31,9 @@ CP = {}
 for j in M:
     CP[j] = sum(b.values()) if random.random() <= 0.3 else random.randint(1000, 5000)
 
-D = {}
-for x in pontos:
-    D[x] = [round(random.uniform(1.0, 600.0), 4), round(random.uniform(1.0, 600.0), 4)]
+# D = {}
+# for x in pontos:
+#     D[x] = [round(random.uniform(1.0, 600.0), 4), round(random.uniform(1.0, 600.0), 4)]
 
 with open("instances.txt", "w") as file:
     file.write(str(cr) + "\n" + str(cf) + "\n" + str(ci) + "\n" + str(er) + "\n" + str(ef))
@@ -57,10 +57,10 @@ with open("instances.txt", "w") as file:
     for j in M:
         file.write(str(CP[j]) + " ")
     
-    file.write("\n")
+    # file.write("\n")
     
-    for x in pontos:
-        file.write(str(x) + " " + str(D[x][0]) + " " + str(D[x][1]) + "\n")
+    # for x in pontos:
+    #     file.write(str(x) + " " + str(D[x][0]) + " " + str(D[x][1]) + "\n")
         
     
     
