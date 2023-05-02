@@ -2,120 +2,108 @@ import gurobipy as gp
 import numpy as np
 import math
 import random
+import pandas as pd
+from utils import gen_points
 
-with open("instances.txt") as file:
-    lines = [linha.strip() for linha in file.readlines()]
+orig = int(input("Quantidade origens: "))
+trans = int(input("Quantidade transbordos: "))
+port = int(input("Quantidade portos: "))
+cli = int(input("Quantidade clientes: "))
+
+points_orig = gen_points.get_point(lim_x_left=-100, lim_x_right=100,
+                                   lim_y_down=-100, lim_y_up=100, n=orig)
+points_transbordo = gen_points.get_point(lim_x_left=-250, lim_x_right=250,
+                                         lim_y_down=-250, lim_y_up=250, n=trans)
+points_porto = gen_points.get_point(lim_x_left=-1000, lim_x_right=1000,
+                                    lim_y_down=-1000, lim_y_up=1000, n=port)
+
+dist_orig_porto = gen_points.get_cost(points_orig=points_orig, n=orig,
+                                      points_dest=points_porto, m=port, tku=1)
+dist_orig_trans = gen_points.get_cost(points_orig=points_orig, n=orig,
+                                      points_dest=points_transbordo, m=trans, tku=1)
+dist_transbordo_porto = gen_points.get_cost(points_orig=points_transbordo, n=trans,
+                                            points_dest=points_porto, m=port, tku=1)
 
 # Custo do transporte rodoviário
-cr = float(lines[0])
+cr = 0.16
 
 # Custo do transporte ferroviário
-cf = float(lines[1])
+cf = 0.08
 
 # Custo da multimodalidade
-ci = float(lines[2])
+ci = 0.02
 
 # Emissão do transporte rodoviário
-er = float(lines[3])
+er = 0.2
 
 # Emissão do transporte ferroviário
-ef = float(lines[4])
+ef = 0.04
 
 # Conjunto de armazéns produtores (N)
-N = list(range(1, int(lines[5]) + 1))
+N = list(range(0, orig))
 
 # Conjunto de pontos ferroviários (K)
-K = list(range(len(N) + 1, len(N) + int(lines[6]) + 1))
+K = list(range(0, trans))
 
 # Conjunto de portos de navios destinos (M)
-M = list(range(len(N + K) + 1, len(N + K) + int(lines[7]) + 1))
+M = list(range(0, port))
 
 # Conjunto de clientes (O)
-O = list(range(1, int(lines[8]) + 1))
+O = list(range(0, cli))
 
 # Demanda de cada cliente (em toneladas)
-demanda = {}
-line_split = lines[9].split(" ")
+demmand = {}
 for o in O:
-    demanda[o] = int(line_split[o - 1])
+    demmand[o] = random.randint(1, 5000)
 
 # Oferta de cada armazém produtor (em toneladas)
-oferta = {}
-line_split = lines[10].split(" ")
+supply = {}
 for i in N:
-    oferta[i] = int(line_split[i - 1])
-
+    supply[i] = sum(demmand.values()) if random.uniform(0, 1) <= 0.7 else random.randint(500, 100000)
+    
 # Capacidade máxima do porto ferroviário (CF(k))
 CF = {}
-line_split = lines[11].split(" ")
-for k in range(0, len(K)):
-    CF[K[k]] = int(line_split[k - 1])
-    
+for k in K:
+    CF[k] = sum(demmand.values()) if random.uniform(0, 1) <= 0.7 else random.randint(500, 100000)
+
 # Capacidade máxima do porto de navio (CP(j))
 CP = {}
-line_split = lines[12].split(" ")
-for j in range(0, len(M)):
-    CP[M[j]] = int(line_split[j - 1])
-
-pontos = []
-for x in range(13, len(lines)):
-    line_split = lines[x].split(" ")
-    pontos.append([float(line_split[1]), (float(line_split[2]))])
-    
-
-# Distância em km entre cada par de locais (armazéns, portos e clientes)
-D = {}
-def prepare_data():
-    # nodes  = []
-    # with open('HAHA.txt') as file:
-    #     for line in file:
-    #         nodes.append(line.split())
-    for i in range(len(pontos)):
-        for j in range(len(pontos)):
-            if i != j:
-                D[i + 1, j + 1] = euclidean_distance(int(pontos[i][0]), int(pontos[i][1]), int(pontos[j][0]), int(pontos[j][1]))
-
-
-def euclidean_distance(x1, y1, x2, y2):
-    distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-    return distance
-
-prepare_data()
+for j in M:
+    CP[j] = sum(demmand.values()) if random.uniform(0, 1) <= 0.7 else random.randint(1000, 100000)
 
 # Criação do modelo
 m = gp.Model("Transporte com Transbordo")
 
 # Definição das variáveis de decisão
 X = {}
-
 for i in N:
     for k in K:
         for o in O:
-            X[i, k, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_{}_{}_{}".format(i,k,o))
+            X[i, k, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_Produtor_Transbordo_{}_{}_{}".format(i,k,o))
 for k in K:
     for j in M:
         for o in O:
-            X[k, j, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_{}_{}_{}".format(k, j, o))
+            X[k, j, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_Transbordo_Porto_{}_{}_{}".format(k, j, o))
 for i in N:
     for j in M:
         for o in O:
-            X[i, j, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_{}_{}_{}".format(i, j, o))
+            X[i, j, o] = m.addVar(vtype=gp.GRB.BINARY, lb=0, name="X_Produtor_Porto{}_{}_{}".format(i, j, o))
 
 y1 = m.addVar(vtype=gp.GRB.BINARY, name="y1")
 y2 = m.addVar(vtype=gp.GRB.BINARY, name="y2")
 
 # Definição da função objetivo
 # Função objetivo de custo do transporte
-f1 = gp.quicksum(cr * D[i, k] * X[i, k, o] for i in N for k in K for o in O) + \
-     gp.quicksum(cf * D[k, j] * X[k, j, o] for k in K for j in M for o in O) + \
+f1 = gp.quicksum(cr * dist_orig_trans[i][k] * X[i, k, o] for i in N for k in K for o in O) + \
+     gp.quicksum(cf * dist_transbordo_porto[k][j] * X[k, j, o] for k in K for j in M for o in O) + \
      gp.quicksum(ci * X[k, j, o] for k in K for j in M for o in O) + \
-     gp.quicksum(cr * D[i, j] * X[i, j, o] for i in N for j in M for o in O)
+     gp.quicksum(cr * dist_orig_porto[i][j] * X[i, j, o] for i in N for j in M for o in O)
          
 
 # # Função objetivo de minimização de emissão de CO2
-f2 = gp.quicksum(er * D[i, k] * X[i, k, o] for i in N for k in K for o in O) + \
-     gp.quicksum(ef * D[k, j] * X[k, j, o] for j in M for k in K for o in O) + \
-     gp.quicksum(er * D[i, j] * X[i, j, o] for i in N for j in M for o in O)
+f2 = gp.quicksum(er * dist_orig_trans[i][k] * X[i, k, o] for i in N for k in K for o in O) + \
+     gp.quicksum(ef * dist_transbordo_porto[k][j] * X[k, j, o] for j in M for k in K for o in O) + \
+     gp.quicksum(er * dist_orig_porto[i][j] * X[i, j, o] for i in N for j in M for o in O)
 
 # m.setObjective(f1, gp.GRB.MINIMIZE)
 
@@ -124,17 +112,17 @@ m.setObjectiveN(f2, 1, priority=1, name="Emissão do transporte")
 
 # Oferta dos produtores:
 for i in N:
-    m.addConstr(gp.quicksum(X[i, k, o] for k in K for o in O) <= oferta[i] * y1, "Oferta_Prod_{}".format(i))
+    m.addConstr(gp.quicksum(X[i, k, o] for k in K for o in O) <= supply[i] * y1, "Oferta_Prod_{}".format(i))
     
 for i in N:
-    m.addConstr(gp.quicksum(X[i, j, o] for j in M for o in O) <= oferta[i] * y2, "Oferta_Prod_{}".format(i))
+    m.addConstr(gp.quicksum(X[i, j, o] for j in M for o in O) <= supply[i] * y2, "Oferta_Prod_{}".format(i))
 
 # Demanda dos clientes:
 for o in O:
-    m.addConstr(gp.quicksum(X[k, j, o] for k in K for j in M) == demanda[o] * y1, "Demanda_Cli_{}".format(o))
+    m.addConstr(gp.quicksum(X[k, j, o] for k in K for j in M) == demmand[o] * y1, "Demanda_Cli_{}".format(o))
     
 for o in O:
-    m.addConstr(gp.quicksum(X[i, j, o] for i in N for j in M) == demanda[o] * y2, "Demanda_Cli_{}".format(o))
+    m.addConstr(gp.quicksum(X[i, j, o] for i in N for j in M) == demmand[o] * y2, "Demanda_Cli_{}".format(o))
 
 # Capacidade dos pontos ferroviários
 for k in K:
