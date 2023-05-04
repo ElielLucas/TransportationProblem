@@ -1,0 +1,28 @@
+# Solution for model Transporte com Transbordo
+# Objective value = 5.5134687491099321e+03
+X_Prod0_Trans0_Cliente0 0
+X_Prod0_Trans1_Cliente0 0
+X_Prod1_Trans0_Cliente0 0
+X_Prod1_Trans1_Cliente0 0
+X_Prod2_Trans0_Cliente0 0
+X_Prod2_Trans1_Cliente0 0
+X_Trans0_Porto0_Cliente0 0
+X_Trans0_Porto1_Cliente0 0
+X_Trans0_Porto2_Cliente0 0
+X_Trans0_Porto3_Cliente0 0
+X_Trans1_Porto0_Cliente0 0
+X_Trans1_Porto1_Cliente0 0
+X_Trans1_Porto2_Cliente0 0
+X_Trans1_Porto3_Cliente0 0
+X_Prod0_Porto0_Cliente0 42.5
+X_Prod0_Porto1_Cliente0 0
+X_Prod0_Porto2_Cliente0 0
+X_Prod0_Porto3_Cliente0 5
+X_Prod1_Porto0_Cliente0 0
+X_Prod1_Porto1_Cliente0 0
+X_Prod1_Porto2_Cliente0 0
+X_Prod1_Porto3_Cliente0 0
+X_Prod2_Porto0_Cliente0 5
+X_Prod2_Porto1_Cliente0 0
+X_Prod2_Porto2_Cliente0 0
+X_Prod2_Porto3_Cliente0 0
