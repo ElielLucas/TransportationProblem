@@ -2,6 +2,7 @@ import gurobipy as gp
 import numpy as np
 import math
 import random
+import time
 from utils import gen_points
 
 orig = int(input("Quantidade origens: "))
@@ -9,7 +10,11 @@ trans = int(input("Quantidade transbordos: "))
 port = int(input("Quantidade portos: "))
 cli = int(input("Quantidade clientes: "))
 
-# Custo do transporte rodoviário
+range_trans = orig
+range_port = orig + trans
+range_client = orig + trans + port
+
+# Custo do transporte                       
 cr = 0.7
 
 # Custo do transporte ferroviário
@@ -28,29 +33,21 @@ ef = 0.2
 N = list(range(0, orig))
 
 # Conjunto de pontos ferroviários (K)
-K = [(i + orig) for i in range(trans)]
+K = [(i + range_trans) for i in range(trans)]
 
 # Conjunto de portos de navios destinos (M)
-M = [(i + orig + trans) for i in range(port)]
+M = [(i + range_port) for i in range(port)]
 
 # Conjunto de clientes (O)
-O = [(i + orig + trans + port) for i in range(cli)]
+O = [(i + range_client) for i in range(cli)]
 
-demanda = {}
-for o in O:
-    demanda[o] = 100
+demandas = np.random.randint(1, 5000, len(O))
 
-oferta = {}
-for i in N:
-    oferta[i] = sum(demanda.values()) if random.random() <= 0.3 else random.randint(100, 100000)
-    
-CF = {}
-for k in K:
-    CF[k] = sum(demanda.values()) if random.random() <= 0.3 else random.randint(500, 5000)
+ofertas = np.where(np.random.random(len(N)) <= 0.3, np.sum(demandas), np.random.randint(100, 100000, len(N)))
 
-CP = {}
-for j in M:
-    CP[j] = sum(demanda.values()) if random.random() <= 0.3 else random.randint(1000, 5000)
+CF = np.where(np.random.random(len(K)) <= 0.3, np.sum(demandas), np.random.randint(500, 100000, len(K)))
+
+CP = np.where(np.random.random(len(M)) <= 0.3, np.sum(demandas), np.random.randint(1000, 5000, len(M)))
 
 points_orig = gen_points.get_point(lim_x_left=-100, lim_x_right=100,
                                    lim_y_down=-100, lim_y_up=100, n=orig)
@@ -58,24 +55,6 @@ points_trans = gen_points.get_point(lim_x_left=-250, lim_x_right=250,
                                     lim_y_down=-250, lim_y_up=250, n=trans)
 points_portos = gen_points.get_point(lim_x_left=-1000, lim_x_right=1000,
                                      lim_y_down=-1000, lim_y_up=1000, n=port)
-
-# print("Pontos de origem")
-# points_orig = []
-# for _ in N:
-#     points = input("Ponto X e Y: ").split(" ")
-#     points_orig.append(gen_points.Point(int(points[0]), int(points[1])))
-    
-# print("Pontos de transbordo")
-# points_trans = []
-# for _ in K:
-#     points = input("Ponto X e Y: ").split(" ")
-#     points_trans.append(gen_points.Point(int(points[0]), int(points[1])))
-    
-# print("Pontos de porto")
-# points_portos = []
-# for _ in M:
-#     points = input("Ponto X e Y: ").split(" ")
-#     points_portos.append(gen_points.Point(int(points[0]), int(points[1])))
 
 dist_orig_trans = {}
 for i in N:
@@ -85,73 +64,89 @@ for i in N:
 dist_trans_porto = {}
 for k in K:
     for j in M:
-        dist_trans_porto[k, j] = gen_points.distance(points_trans[k - orig].x, points_trans[k - orig].y, points_portos[j - orig - trans].x, points_portos[j - orig - trans].y)
+        dist_trans_porto[k, j] = gen_points.distance(points_trans[k - orig].x, points_trans[k - orig].y, points_portos[j - range_port].x, points_portos[j - range_port].y)
         
 dist_orig_porto = {}
 for i in N:
     for j in M:
-        dist_orig_porto[i, j] = gen_points.distance(points_orig[i].x, points_orig[i].y, points_portos[j - orig - trans].x, points_portos[j - orig - trans].y)
+        dist_orig_porto[i, j] = gen_points.distance(points_orig[i].x, points_orig[i].y, points_portos[j - range_port].x, points_portos[j - range_port].y)
 
+start_time = time.time()
 # Criação do modelo
 m = gp.Model("Transporte com Transbordo")
 
-# Definição das variáveis de decisão
-X = {}
-for i in N:
-    for k in K:
-        for o in O:
-            X[i, k, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod{}_Trans{}_Cliente{}".format(i,k,o))
-for k in K:
-    for j in M:
-        for o in O:
-            X[k, j, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Trans{}_Porto{}_Cliente{}".format(k, j, o))
-for i in N:
-    for j in M:
-        for o in O:
-            X[i, j, o] = m.addVar(vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod{}_Porto{}_Cliente{}".format(i, j, o))
+# # Definição das variáveis de decisão
+X = m.addVars(N, K, O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod_Trans_Cliente")
+X.update(m.addVars(K, M, O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Trans_Porto_Cliente"))
+X.update(m.addVars(N, M, O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod_Porto_Cliente"))
 
 # Definição da função objetivo
 # Função objetivo de custo do transporte
-f1 = gp.quicksum(cr * dist_orig_trans[i, k] * X[i, k, o] for i in N for k in K for o in O) + \
-     gp.quicksum(cf * dist_trans_porto[k, j] * X[k, j, o] for k in K for j in M for o in O) + \
-     gp.quicksum(cr * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
+f1 = sum(cr * dist_orig_trans[i, k] * X[i, k, o] for i in N for k in K for o in O)
+f1 += sum(cf * dist_trans_porto[k, j] * X[k, j, o] for k in K for j in M for o in O)
+f1 += sum(cr * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
          
-
 # Função objetivo de minimização de emissão de CO2
-f2 = gp.quicksum(er * dist_orig_trans[i, k] * X[i, k, o] for i in N for k in K for o in O) + \
-     gp.quicksum(ef * dist_trans_porto[k, j] * X[k, j, o] for j in M for k in K for o in O) + \
-     gp.quicksum(er * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
-
-# m.setObjective(f1, gp.GRB.MINIMIZE)
+f2 = sum(er * dist_orig_trans[i, k] * X[i, k, o] for i in N for k in K for o in O)
+f2 += sum(ef * dist_trans_porto[k, j] * X[k, j, o] for k in K for j in M for o in O)
+f2 += sum(er * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
 
 m.setObjectiveN(f1, 0, priority=2, name="Custo do transporte")
 m.setObjectiveN(f2, 1, priority=1, name="Emissão do transporte")
 
 # Oferta dos produtores:
 for i in N:
-    m.addConstr(((gp.quicksum(X[i, k, o] for k in K for o in O)) + (gp.quicksum(X[i, j, o] for j in M for o in O))) <= oferta[i], "Oferta_Prod_{}".format(i))
+    expr = sum([X[i, k, o] for k in K for o in O])
+    expr += sum([X[i, j, o] for j in M for o in O])
+    m.addConstr(expr <= ofertas[i], "Oferta_Prod_{}".format(i))
     
 # Demanda dos clientes:
 for o in O:
-    m.addConstr(((gp.quicksum(X[i, j, o] for i in N for j in M)) + (gp.quicksum(X[k, j, o] for k in K for j in M))) == demanda[o], "Demanda_Cli_{}".format(o))
+    expr = sum([X[i, j, o] for i in N for j in M])
+    expr += sum([X[k, j, o] for k in K for j in M])
+    m.addConstr(expr == demandas[o - range_client], "Demanda_Cli_{}".format(o))
 
 # Capacidade dos pontos ferroviários
 for k in K:
-    m.addConstr(gp.quicksum(X[i, k, o] for i in N for o in O) <= CF[k], "Cap_Ferro_{}".format(k))
+    expr = sum([X[i, k, o] for i in N for o in O])
+    m.addConstr(expr <= CF[k - range_trans], "Cap_Ferro_{}".format(k))
 
 # Capacidade dos portos de navio
-for j in M:
-    m.addConstr(((gp.quicksum(X[i, j, o] for i in N for o in O)) + (gp.quicksum(X[k, j, o] for k in K for o in O))) <= CP[j], "Cap_Porto_{}".format(j))
+for j in M: 
+    expr = sum([X[i, j, o] for i in N for o in O])
+    expr += sum([X[k, j, o] for k in K for o in O])
+    m.addConstr(expr <= CP[j - range_port], "Cap_Porto_{}".format(j))
 
 # Igualdade das quantidades
 for k in K:
-    m.addConstr((gp.quicksum(X[i, k, o] for i in N for o in O))  == gp.quicksum(X[k, j, o] for j in M for o in O), "Igualdade_{}".format(k))
+    expr1 = sum([X[i, k, o] for i in N for o in O])
+    expr2 = sum([X[k, j, o] for j in M for o in O])
+    m.addConstr(expr1 == expr2), "Igualdade_{}".format(k)
 
 
 # Atualização do modelo com novas variáveis
 m.update()
 
+m.setParam('TimeLimit', 60*9)
+m.setParam(gp.GRB.Param.Threads, 1)
+# m.setParam('NodefileStart', nodefile)
+
 # Otimização do modelo
 m.optimize()
 
-m.write("out.sol")
+total_time = time.time() - start_time
+print("Total time: ", total_time)
+
+# Verificar o status da otimização
+status = m.status
+if status == gp.GRB.OPTIMAL:
+    pass
+    # A otimização foi bem-sucedida, faça algo com a solução
+    # solution = m.getAttr('x', m.getVars())
+elif status == gp.GRB.TIME_LIMIT:
+    print('Limite de tempo atingido, a solução não foi encontrada dentro do tempo definido.')
+else:
+    print('A otimização foi interrompida devido a um erro ou outro motivo.')
+
+
+# m.write("out.sol")    
