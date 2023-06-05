@@ -18,8 +18,12 @@ def find_nearest_neighbor(ponto_referencia, possiveis_destinos, pontos_sem_capac
 def calcular_custo_transporte(gene):
     custo_transporte= 0
     for node_ini, aresta in gene.lista_adjacencia.items():
-        for node_fim, custo in aresta.items():
-            custo_transporte += custo * inp.dist_matrix[node_ini][node_fim]
+        for node_fim, qtd_transportada in aresta.items():
+            if (node_ini in inp.N and node_fim in inp.K) or (node_ini in inp.N and node_fim in inp.M):
+                custo_modal = inp.cr
+            else:
+                custo_modal = inp.cf
+            custo_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * custo_modal
     return custo_transporte
 
 
@@ -77,10 +81,12 @@ class Individuo:
         self.portos = inp.M
         self.ferrovias = inp.K
         self.demandas_clientes = inp.demandas_clientes.copy()
-        self.cromossomos = [Cromossomo()] * len(self.demandas_clientes)
+        self.cromossomos = []
+        for _ in range(len(self.demandas_clientes)):
+            self.cromossomos.append(Cromossomo())
         
         if montar_solução_random:
-            self.montar_solução_random()
+            self.montar_solução_random() 
     
 
     def montar_solução_random(self):
@@ -91,17 +97,17 @@ class Individuo:
             alocacao_produtores = self.distribuir_demanda_aleatoriamente_para_produtores(demanda=demanda, ofertas=inp.ofertas, quantidade_produtores=len(self.produtores))
             
             self.distribuir_demanda_de_produtores_para_transbordo_e_portos(gene_origem=alocacao_produtores, gene_intermediario=alocacao_transbordos, 
-                                                                           gene_destino=alocacao_portos, capacidade_intermediarios=inp.capacidade_ferrovias, 
-                                                                           capacidade_destino=inp.capacidade_portos, pontos_sem_capacidade=pontos_sem_capacidade,
+                                                                           gene_destino=alocacao_portos, capacidade_intermediarios=inp.capacidade_ferrovias.copy(), 
+                                                                           capacidade_destino=inp.capacidade_portos.copy(), pontos_sem_capacidade=pontos_sem_capacidade,
                                                                            origens=self.produtores, intermediarios=self.ferrovias, destinos=self.portos, 
                                                                            cromossomo=self.cromossomos[i])
             self.distribuir_demanda_de_transbordos_para_portos(gene_intermediario=alocacao_transbordos, gene_destino=alocacao_portos, 
-                                                               capacidade_destino=inp.capacidade_portos, pontos_sem_capacidade=pontos_sem_capacidade,
+                                                               capacidade_destino=inp.capacidade_portos.copy(), pontos_sem_capacidade=pontos_sem_capacidade,
                                                                intermediarios=self.ferrovias, destinos=self.portos, cromossomo=self.cromossomos[i])
             
-            self.cromossomos[i].set_genes(gene_produtores=alocacao_produtores, 
-                                          gene_transbordos=alocacao_transbordos, 
-                                          gene_portos=alocacao_portos)
+            self.cromossomos[i].set_genes(gene_produtores=alocacao_produtores.copy(), 
+                                          gene_transbordos=alocacao_transbordos.copy(), 
+                                          gene_portos=alocacao_portos.copy())
 
 
     def distribuir_demanda_aleatoriamente_para_produtores(self, demanda, ofertas, quantidade_produtores):
@@ -167,6 +173,13 @@ class Individuo:
         for i in range(len(self.demandas_clientes)):
             custo_total += calcular_custo_transporte(gene=self.cromossomos[i])
         return custo_total
+    
+    def calcular_fit(self, valor_of):
+        if valor_of >= 0:
+            valor_fit = 1 / (1 + valor_of)
+        elif valor_of < 0:
+            valor_fit = 1 + abs(valor_of)
+        return valor_fit
 
         
 
