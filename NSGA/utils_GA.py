@@ -15,9 +15,21 @@ def roulette_wheel_selection(populacao, fit):
 
     selecionados = np.random.choice(populacao, 2, replace = False, p = probabilidades)
     return (selecionados[0], selecionados[1])
+
+def tournament_selection(fit, populacao):
+    selecionados = []
+    for i in range(len(populacao)):
+      cromossomo_1 = randint(0, len(populacao)-1)
+      cromossomo_2 = randint(0, len(populacao)-1)
+
+      if fit[cromossomo_1] > fit[cromossomo_2]:
+          selecionados.append(cromossomo_1)
+      else:
+          selecionados.append(cromossomo_2)
+    return populacao[selecionados[0]], populacao[selecionados[1]]
        
 
-def apagar_rotas_que_vao_para_portos(rotas):
+def apagar_rotas_OD(rotas):
     for node in inp.K:
         if node in rotas:
             del rotas[node]
@@ -31,13 +43,29 @@ def apagar_rotas_que_vao_para_portos(rotas):
     
     for node_ini, node_fim in apagar_arestas:
         del rotas[node_ini][node_fim]
-        
+
+
+def apagar_rotas_OI_e_OD(rotas):
+    for node in inp.N:
+        if node in rotas:
+            del rotas[node]
+            
+
+def apagar_rotas_OI_e_ID(rotas):
+    apagar_arestas = []
+    for node_ini in (inp.N + inp.K):
+        if node_ini in rotas:
+            for node_fim, custo in rotas[node_ini].items():
+                if node_fim in (inp.K + inp.M):
+                    apagar_arestas.append((node_ini, node_fim))
+            
+     
 def montar_rotas_faltantes_1(child, parent1, parent2):
     
     for i, cromo in enumerate(child.cromossomos):
         cromo.set_genes(gene_produtores=parent1.cromossomos[i].gene_produtores,
-                                        gene_transbordos=parent1.cromossomos[i].gene_transbordos,
-                                        gene_portos=parent2.cromossomos[i].gene_portos)
+                        gene_transbordos=parent1.cromossomos[i].gene_transbordos,
+                        gene_portos=parent2.cromossomos[i].gene_portos)
         
         rotas_parent1 = parent1.cromossomos[i].lista_adjacencia
         
@@ -51,7 +79,7 @@ def montar_rotas_faltantes_1(child, parent1, parent2):
                 if node_ini in inp.N and node_fim in inp.M:
                     alocacao_origens[node_ini] += custo
                     
-        apagar_rotas_que_vao_para_portos(rotas_parent1)
+        apagar_rotas_OD(rotas_parent1)
         
         pontos_sem_capacidade = [] 
         for porto in inp.M:
@@ -110,62 +138,116 @@ def montar_rotas_faltantes_2(child, parent1, parent2):
         
         alocacao_destinos = cromo.gene_portos.copy()
         alocacao_transbordos = cromo.gene_transbordos.copy()
-        alocacao_origens = [0] * len(inp.N)
+        alocacao_origens = cromo.gene_produtores.copy()
         
-        # Passa os pesos das arestas para um vetor de origens que será distribuído novamente.
-        for node_ini, aresta in rotas_parent1.items():
-            for node_fim, custo in aresta.items():
-                if node_ini in inp.N and node_fim in inp.M:
-                    alocacao_origens[node_ini] += custo
-                    
-        apagar_rotas_que_vao_para_portos(rotas_parent1)
-        
+        apagar_rotas_OI_e_OD(rotas_parent1)
         pontos_sem_capacidade = [] 
-        for porto in inp.M:
-            if alocacao_destinos[porto - inp.range_port] > 0:
-                alocacao_a_ser_distribuida = alocacao_destinos[porto - inp.range_port]
+        for produtor in inp.N:
+            if alocacao_origens[produtor] > 0:
+                alocacao_a_ser_distribuida = alocacao_origens[produtor]
                 while alocacao_a_ser_distribuida > 0:
-                    ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=porto, possiveis_destinos=inp.N + inp.K, 
+                    ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=produtor, possiveis_destinos=inp.K + inp.M, 
                                                                pontos_sem_capacidade=pontos_sem_capacidade)
+                    
                     if ponto_mais_proximo in inp.K:
-                        if alocacao_destinos[porto - inp.range_port] <= alocacao_transbordos[ponto_mais_proximo - inp.range_trans]:
-                            new_allocation = alocacao_destinos[porto - inp.range_port]
+                        if alocacao_origens[produtor] <= alocacao_transbordos[ponto_mais_proximo - inp.range_trans]:
+                            new_allocation = alocacao_origens[produtor]
                             alocacao_transbordos[ponto_mais_proximo - inp.range_trans] -= new_allocation
                             alocacao_a_ser_distribuida -= new_allocation
-                            alocacao_destinos[porto - inp.range_port] = 0
+                            alocacao_origens[produtor] = 0
                         else:
-                            excess = alocacao_destinos[porto - inp.range_port] - alocacao_transbordos[ponto_mais_proximo - inp.range_trans]
-                            new_allocation = alocacao_destinos[porto - inp.range_port] - excess
+                            excess = alocacao_origens[produtor] - alocacao_transbordos[ponto_mais_proximo - inp.range_trans]
+                            new_allocation = alocacao_origens[produtor] - excess
                             alocacao_transbordos[ponto_mais_proximo - inp.range_trans] -= new_allocation
-                            alocacao_destinos[porto - inp.range_port] -= new_allocation
+                            alocacao_origens[produtor] -= new_allocation
                             alocacao_a_ser_distribuida -= new_allocation
                             
                         if alocacao_transbordos[ponto_mais_proximo - inp.range_trans] == 0:
                             pontos_sem_capacidade.append(ponto_mais_proximo)
-                    elif ponto_mais_proximo in inp.N:
-                        if alocacao_destinos[porto - inp.range_port] <= alocacao_origens[ponto_mais_proximo]:
-                            new_allocation = alocacao_destinos[porto - inp.range_port]
-                            alocacao_origens[ponto_mais_proximo] -= new_allocation
+                    elif ponto_mais_proximo in inp.M:
+                        if alocacao_origens[produtor] <= alocacao_destinos[ponto_mais_proximo - inp.range_port]:
+                            new_allocation = alocacao_origens[produtor]
+                            alocacao_destinos[ponto_mais_proximo - inp.range_port] -= new_allocation
                             alocacao_a_ser_distribuida -= new_allocation
-                            alocacao_destinos[porto - inp.range_port] = 0
+                            alocacao_origens[produtor] = 0
                         else:
-                            excess = alocacao_destinos[porto - inp.range_port] - alocacao_origens[ponto_mais_proximo]
-                            new_allocation = alocacao_destinos[porto - inp.range_port] - excess
-                            alocacao_origens[ponto_mais_proximo] -= new_allocation
-                            alocacao_destinos[porto - inp.range_port] -= new_allocation
+                            excess = alocacao_origens[produtor] - alocacao_destinos[ponto_mais_proximo - inp.range_port]
+                            new_allocation = alocacao_origens[produtor] - excess
+                            alocacao_destinos[ponto_mais_proximo - inp.range_port] -= new_allocation
+                            alocacao_origens[produtor] -= new_allocation
                             alocacao_a_ser_distribuida -= new_allocation
                             
-                        if alocacao_origens[ponto_mais_proximo] == 0:
+                        if alocacao_destinos[ponto_mais_proximo - inp.range_port] == 0:
                             pontos_sem_capacidade.append(ponto_mais_proximo)
-                    
-                    
+
                     if new_allocation > 0:
-                        if ponto_mais_proximo in rotas_parent1:
-                            rotas_parent1[ponto_mais_proximo][porto] = new_allocation
+                        if produtor in rotas_parent1:
+                            rotas_parent1[produtor][ponto_mais_proximo] = new_allocation
                         else:
-                            rotas_parent1[ponto_mais_proximo] = {porto: new_allocation}
+                            rotas_parent1[produtor] = {ponto_mais_proximo: new_allocation}
                             
         cromo.lista_adjacencia = rotas_parent1
+        
+        
+# def montar_rotas_faltantes_3(child, parent1, parent2):
+#     for i, cromo in enumerate(child.cromossomos):
+#         cromo.set_genes(gene_produtores=parent1.cromossomos[i].gene_produtores,
+#                         gene_transbordos=parent2.cromossomos[i].gene_transbordos,
+#                         gene_portos=parent1.cromossomos[i].gene_portos)
+        
+#         rotas_parent1 = parent1.cromossomos[i].lista_adjacencia
+        
+#         alocacao_destinos = cromo.gene_portos.copy()
+#         alocacao_transbordos = cromo.gene_transbordos.copy()
+#         alocacao_origens = cromo.gene_produtores.copy()
+        
+#         apagar_rotas_OI_e_ID(rotas_parent1)
+#         pontos_sem_capacidade = [] 
+#         for transbordo in inp.K:
+#             if alocacao_transbordos[transbordo - inp.range_trans] > 0:
+#                 alocacao_a_ser_distribuida = alocacao_transbordos[transbordo - inp.range_trans]
+#                 while alocacao_a_ser_distribuida > 0:
+#                     ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=transbordo, possiveis_destinos=inp.N, 
+#                                                                pontos_sem_capacidade=pontos_sem_capacidade)
+                    
+#                     if ponto_mais_proximo in inp.K:
+#                         if alocacao_origens[produtor] <= alocacao_transbordos[ponto_mais_proximo - inp.range_trans]:
+#                             new_allocation = alocacao_origens[produtor]
+#                             alocacao_transbordos[ponto_mais_proximo - inp.range_trans] -= new_allocation
+#                             alocacao_a_ser_distribuida -= new_allocation
+#                             alocacao_origens[produtor] = 0
+#                         else:
+#                             excess = alocacao_origens[produtor] - alocacao_transbordos[ponto_mais_proximo - inp.range_trans]
+#                             new_allocation = alocacao_origens[produtor] - excess
+#                             alocacao_transbordos[ponto_mais_proximo - inp.range_trans] -= new_allocation
+#                             alocacao_origens[produtor] -= new_allocation
+#                             alocacao_a_ser_distribuida -= new_allocation
+                            
+#                         if alocacao_transbordos[ponto_mais_proximo - inp.range_trans] == 0:
+#                             pontos_sem_capacidade.append(ponto_mais_proximo)
+#                     elif ponto_mais_proximo in inp.M:
+#                         if alocacao_origens[produtor] <= alocacao_destinos[ponto_mais_proximo - inp.range_port]:
+#                             new_allocation = alocacao_origens[produtor]
+#                             alocacao_destinos[ponto_mais_proximo - inp.range_port] -= new_allocation
+#                             alocacao_a_ser_distribuida -= new_allocation
+#                             alocacao_origens[produtor] = 0
+#                         else:
+#                             excess = alocacao_origens[produtor] - alocacao_destinos[ponto_mais_proximo - inp.range_port]
+#                             new_allocation = alocacao_origens[produtor] - excess
+#                             alocacao_destinos[ponto_mais_proximo - inp.range_port] -= new_allocation
+#                             alocacao_origens[produtor] -= new_allocation
+#                             alocacao_a_ser_distribuida -= new_allocation
+                            
+#                         if alocacao_destinos[ponto_mais_proximo - inp.range_port] == 0:
+#                             pontos_sem_capacidade.append(ponto_mais_proximo)
+
+#                     if new_allocation > 0:
+#                         if produtor in rotas_parent1:
+#                             rotas_parent1[produtor][ponto_mais_proximo] = new_allocation
+#                         else:
+#                             rotas_parent1[produtor] = {ponto_mais_proximo: new_allocation}
+                            
+#         cromo.lista_adjacencia = rotas_parent1
     
         
 def crossover_1(parent1, parent2):
@@ -178,14 +260,29 @@ def crossover_1(parent1, parent2):
     return child1, child2
 
 
-# def crossover_2(parent1, parent2):
+def crossover_2(parent1, parent2):
+    child1 = Individuo(montar_solução_random=False)
+    child2 = Individuo(montar_solução_random=False)
+    
+    montar_rotas_faltantes_2(child1, parent1, parent2)
+    montar_rotas_faltantes_2(child2, parent2, parent1)
+    
+    return child1, child2
+
+# def crossover_3(parent1, parent2):
 #     child1 = Individuo(montar_solução_random=False)
 #     child2 = Individuo(montar_solução_random=False)
     
-#     montar_rotas_faltantes_2(child1, parent1, parent2)
-#     montar_rotas_faltantes_2(child2, parent2, parent1)
+#     montar_rotas_faltantes_3(child1, parent1, parent2)
+#     montar_rotas_faltantes_3(child2, parent2, parent1)
     
 #     return child1, child2
+
+
+def crossover(parent1, parent2):
+    child1, child2 = crossover_1(parent1, parent2)
+    child3, child4 = crossover_2(parent1, parent2)
+    return child1, child2, child3, child4
 
 
 def get_fit(populacao):
@@ -202,6 +299,7 @@ def update_fit(populacao):
         
     return OF, FIT
 
+
 def update_population(population, of, fit, n_pop):
     SORT_POSITIONS = np.argsort(of)
     new_population = []
@@ -215,24 +313,31 @@ def update_population(population, of, fit, n_pop):
         
     return new_population, new_of, new_fit
 
-n_iter = 300
-n_pop = 1000
-populacao = criar_população(n_pop)
-of, fit = update_fit(populacao)
-populacao, of, fit = update_population(populacao, of, fit, n_pop)
 
-# # Iteration procedure
+n_iter = 3000
+n_pop = 100
+populacao = criar_população(n_pop)
+
+of, fit = update_fit(populacao)
+# populacao, of, fit = update_population(populacao, of, fit, n_pop)
+
+# Iteration procedure
 for it in range(n_iter):
     new_population = []
     for ind in range(n_pop):
         # Selection procedure
-        parent1, parent2 = roulette_wheel_selection(populacao=populacao, fit=fit)
+        escolha = random()
+        if escolha <= 0.3:
+            parent1, parent2 = roulette_wheel_selection(populacao=populacao, fit=fit)
+        else:
+            parent1, parent2 = tournament_selection(fit, populacao)
         # Crossover procedure
-        child1, child2 = crossover_1(parent1=parent1, parent2=parent2)
-        
+        child1, child2, child3, child4 = crossover(parent1=parent1, parent2=parent2)
         # Add in new population
         new_population.append(child1)
         new_population.append(child2)
+        new_population.append(child3)
+        new_population.append(child4)
     
     new_of, new_fit = update_fit(new_population)
     

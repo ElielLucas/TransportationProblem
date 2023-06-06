@@ -56,6 +56,49 @@ points_trans = gen_points.get_point(lim_x_left=-250, lim_x_right=250,
 points_portos = gen_points.get_point(lim_x_left=-1000, lim_x_right=1000,
                                      lim_y_down=-1000, lim_y_up=1000, n=port)
 
+texto = str(cr) + '\n' + str(cf) + '\n'
+for i in N:
+    texto += str(i) + ' '
+texto+='\n'
+
+for i in K:
+    texto += str(i) + ' '
+texto += '\n'
+
+for i in M:
+    texto += str(i) + ' '
+texto += '\n'
+
+for i in demandas:
+    texto += str(i) + ' '
+texto += '\n'
+
+for i in ofertas:
+    texto += str(i) + ' '
+texto += '\n'
+
+for i in CF:
+    texto += str(i) + ' '
+texto += '\n'
+
+for i in CP:
+    texto += str(i) + ' '
+texto += '\n'
+
+for i in points_orig:
+    texto += str(i.x) + ' ' + str(i.y) + '\n'
+    
+for i in points_trans:
+    texto += str(i.x) + ' ' + str(i.y) + '\n'
+    
+for i in points_portos:
+    texto += str(i.x) + ' ' + str(i.y) + '\n'
+
+
+with open('input_transport_problem.txt', 'w') as arquivo:
+    arquivo.write(str(texto))
+
+    
 dist_orig_trans = {}
 for i in N:
     for k in K:

@@ -6,7 +6,6 @@ from typing import List
 def find_nearest_neighbor(ponto_referencia, possiveis_destinos, pontos_sem_capacidade):
         vizinho_mais_proximo = float('inf')
         indice_vizinho_mais_proximo = None
-
         for i, distancia in enumerate(inp.dist_matrix[ponto_referencia]):
             if i in possiveis_destinos and i not in pontos_sem_capacidade and distancia < vizinho_mais_proximo:
                 vizinho_mais_proximo = distancia
