@@ -41,6 +41,7 @@ with open('input_transport_problem.txt', 'r') as arquivo:
     
     demandas_clientes = linhas[5].split()
     demandas_clientes = [int(valor) for valor in demandas_clientes if valor != '\n']
+    # demandas_clientes = [sum(demandas)]
     
     ofertas = linhas[6].split()
     ofertas = [int(valor) for valor in ofertas if valor != '\n']

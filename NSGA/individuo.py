@@ -1,24 +1,30 @@
 import numpy as np
 import random
 import defines as inp
-from typing import List
+from typing import List, Dict, DefaultDict, Set
+from collections import defaultdict
 
 def find_nearest_neighbor(ponto_referencia, possiveis_destinos, pontos_sem_capacidade):
-        vizinho_mais_proximo = float('inf')
-        indice_vizinho_mais_proximo = None
-        for i, distancia in enumerate(inp.dist_matrix[ponto_referencia]):
-            if i in possiveis_destinos and i not in pontos_sem_capacidade and distancia < vizinho_mais_proximo:
-                vizinho_mais_proximo = distancia
-                indice_vizinho_mais_proximo = i
+    pontos_sem_capacidade = set(pontos_sem_capacidade)
+    vizinho_mais_proximo = float('inf')
+    indice_vizinho_mais_proximo = None
+    for i, distancia in enumerate(inp.dist_matrix[ponto_referencia]):
+        if i in possiveis_destinos and i not in pontos_sem_capacidade and distancia < vizinho_mais_proximo:
+            vizinho_mais_proximo = distancia
+            indice_vizinho_mais_proximo = i
 
-        return indice_vizinho_mais_proximo
+    return indice_vizinho_mais_proximo
     
-    
+# populacao[0].cromossomos[0].lista_adjacencia
 def calcular_custo_transporte(gene):
+    N = set(inp.N)
+    K = set(inp.K)
+    M = set(inp.M)
+
     custo_transporte= 0
     for node_ini, aresta in gene.lista_adjacencia.items():
         for node_fim, qtd_transportada in aresta.items():
-            if (node_ini in inp.N and node_fim in inp.K) or (node_ini in inp.N and node_fim in inp.M):
+            if (node_ini in N and node_fim in K) or (node_ini in N and node_fim in M):
                 custo_modal = inp.cr
             else:
                 custo_modal = inp.cf
@@ -29,49 +35,42 @@ def calcular_custo_transporte(gene):
 def alocar_demanda(provider, target, range_point, provider_allocation,
                    target_point_allocation, target_point_capacity, 
                    total_demanda, cromossomo):
-        new_allocation = 0
-        if len(range_point) == 1:
-            range_provider = 0
-            range_target = range_point[0]
-        else:
-            range_provider = range_point[0]
-            range_target = range_point[1]
-        if provider_allocation[provider - range_provider] <= target_point_capacity[target - range_target]:
-            new_allocation = provider_allocation[provider - range_provider]
-            target_point_allocation[target - range_target] += new_allocation
-            target_point_capacity[target - range_target] -= new_allocation
-            total_demanda -= new_allocation
-            provider_allocation[provider - range_provider] = 0
-        else:
-            excess = provider_allocation[provider - range_provider] - target_point_capacity[target - range_target]
-            new_allocation = provider_allocation[provider - range_provider] - excess
-            target_point_allocation[target - range_target] += new_allocation
-            provider_allocation[provider - range_provider] -= new_allocation
-            target_point_capacity[target - range_target] -= new_allocation
-            total_demanda -= new_allocation
-        
-        cromossomo.add_edge(provider, target, new_allocation)
-        return target_point_allocation, total_demanda
+    # Pre-calcule valores comumente referenciados
+    range_provider = 0 if len(range_point) == 1 else range_point[0]
+    range_target = range_point[0] if len(range_point) == 1 else range_point[1]
+
+    provider_index = provider - range_provider
+    target_index = target - range_target
+
+    # Determine a nova alocação baseada na capacidade e na alocação do fornecedor
+    new_allocation = min(provider_allocation[provider_index], target_point_capacity[target_index])
+
+    # Atualize a alocação e capacidade
+    provider_allocation[provider_index] -= new_allocation
+    target_point_allocation[target_index] += new_allocation
+    target_point_capacity[target_index] -= new_allocation
+    total_demanda -= new_allocation
+
+    # Adicione a borda ao cromossomo
+    cromossomo.add_edge(provider, target, new_allocation)
+
+    return target_point_allocation, total_demanda
     
     
 class Cromossomo:
     def __init__(self) -> None:
-        self.gene_produtores = np.zeros(len(inp.N))
-        self.gene_transbordos = np.zeros(len(inp.M))
-        self.gene_portos = np.zeros(len(inp.K))
-        self.lista_adjacencia = {}
+        self.gene_produtores = np.zeros_like(inp.N)
+        self.gene_transbordos = np.zeros_like(inp.M)
+        self.gene_portos = np.zeros_like(inp.K)
+        self.lista_adjacencia: DefaultDict[int, Dict[int, int]] = defaultdict(dict)
 
-    def set_genes(self, gene_produtores: List[int], gene_transbordos: List[int], gene_portos: List[int]):
+    def set_genes(self, gene_produtores, gene_transbordos, gene_portos) -> None:
         self.gene_produtores = gene_produtores
         self.gene_transbordos = gene_transbordos
         self.gene_portos = gene_portos
-        
 
-    def add_edge(self, u: int, v: int, weight: int):
-        if u in self.lista_adjacencia:
-            self.lista_adjacencia[u][v] = weight
-        else:
-            self.lista_adjacencia[u] = {v: weight}
+    def add_edge(self, u: int, v: int, weight: int) -> None:
+        self.lista_adjacencia[u][v] = weight
 
      
 class Individuo:
@@ -89,7 +88,7 @@ class Individuo:
     
 
     def montar_solução_random(self):
-        pontos_sem_capacidade = []
+        pontos_sem_capacidade: Set[int] = set()
         for i, demanda in enumerate(self.demandas_clientes):
             alocacao_transbordos = [0] * len(self.ferrovias)
             alocacao_portos = [0] * len(self.portos)
@@ -110,42 +109,52 @@ class Individuo:
 
 
     def distribuir_demanda_aleatoriamente_para_produtores(self, demanda, ofertas, quantidade_produtores):
-        vetor = [0] * quantidade_produtores
-        demanda_a_ser_distribuida = demanda
-        while demanda_a_ser_distribuida > 0:
-            for i in range(quantidade_produtores):
-                aleatorio = random.randint(0,min(ofertas[i] - vetor[i], demanda_a_ser_distribuida))   
-                vetor[i] += aleatorio
-                demanda_a_ser_distribuida -= aleatorio
-
+        vetor = np.zeros(quantidade_produtores)
+        while demanda > 0:
+            produtor = random.choice(np.where(ofertas - vetor > 0)[0])
+            aleatorio = random.randint(0, min(ofertas[produtor] - vetor[produtor], demanda))   
+            vetor[produtor] += aleatorio
+            demanda -= aleatorio
         return vetor
 
-
+    
     def distribuir_demanda_de_produtores_para_transbordo_e_portos(self, gene_origem, gene_intermediario, gene_destino, 
-                                                                capacidade_intermediarios, capacidade_destino, 
-                                                                pontos_sem_capacidade, origens, intermediarios, destinos,
-                                                                cromossomo):
+                                                                 capacidade_intermediarios, capacidade_destino, 
+                                                                 pontos_sem_capacidade, origens, intermediarios, destinos,
+                                                                 cromossomo):
         aloc_prod = gene_origem.copy()
         for produtor in origens:
-            if aloc_prod[produtor] > 0:
-                alocacao_a_ser_distribuida = aloc_prod[produtor]
-                while alocacao_a_ser_distribuida > 0:
-                    ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=produtor, possiveis_destinos=intermediarios + destinos, 
-                                                            pontos_sem_capacidade=pontos_sem_capacidade)
-                    if ponto_mais_proximo in intermediarios:
-                        gene_intermediario, alocacao_a_ser_distribuida = alocar_demanda(provider=produtor, target=ponto_mais_proximo, range_point = [inp.range_trans],
-                                                                                        provider_allocation=aloc_prod, target_point_allocation=gene_intermediario, 
-                                                                                        target_point_capacity=capacidade_intermediarios, total_demanda=alocacao_a_ser_distribuida,
+            alocacao_a_ser_distribuida = aloc_prod[produtor]
+            while alocacao_a_ser_distribuida > 0:
+                ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=produtor, 
+                                                        possiveis_destinos=intermediarios + destinos, 
+                                                        pontos_sem_capacidade=pontos_sem_capacidade)
+                if ponto_mais_proximo in intermediarios:
+                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_intermediarios[ponto_mais_proximo - inp.range_trans])
+                    if demanda_alocar > 0:
+                        gene_intermediario, alocacao_a_ser_distribuida = alocar_demanda(provider=produtor, 
+                                                                                        target=ponto_mais_proximo, 
+                                                                                        range_point=[inp.range_trans],
+                                                                                        provider_allocation=aloc_prod, 
+                                                                                        target_point_allocation=gene_intermediario, 
+                                                                                        target_point_capacity=capacidade_intermediarios, 
+                                                                                        total_demanda=demanda_alocar,
                                                                                         cromossomo=cromossomo)
-                        if capacidade_intermediarios[ponto_mais_proximo - inp.range_trans] == 0:
-                            pontos_sem_capacidade.append(ponto_mais_proximo)
                     else:
-                        gene_destino, alocacao_a_ser_distribuida = alocar_demanda(provider=produtor, target=ponto_mais_proximo,  range_point=[inp.range_port],
-                                                                                  provider_allocation=aloc_prod, target_point_allocation=gene_destino, 
-                                                                                  target_point_capacity=capacidade_destino, total_demanda=alocacao_a_ser_distribuida,
+                        pontos_sem_capacidade.add(ponto_mais_proximo)
+                else:
+                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_destino[ponto_mais_proximo - inp.range_port])
+                    if demanda_alocar > 0:
+                        gene_destino, alocacao_a_ser_distribuida = alocar_demanda(provider=produtor, 
+                                                                                  target=ponto_mais_proximo,  
+                                                                                  range_point=[inp.range_port],
+                                                                                  provider_allocation=aloc_prod, 
+                                                                                  target_point_allocation=gene_destino, 
+                                                                                  target_point_capacity=capacidade_destino, 
+                                                                                  total_demanda=demanda_alocar,
                                                                                   cromossomo=cromossomo)
-                        if capacidade_destino[ponto_mais_proximo - inp.range_port] == 0:
-                            pontos_sem_capacidade.append(ponto_mais_proximo)
+                    else:
+                        pontos_sem_capacidade.add(ponto_mais_proximo)
                             
                             
     def distribuir_demanda_de_transbordos_para_portos(self, gene_intermediario, gene_destino, 
@@ -164,7 +173,7 @@ class Individuo:
                                                                               target_point_capacity=capacidade_destino, total_demanda=alocacao_a_ser_distribuida,
                                                                               cromossomo=cromossomo)
                     if capacidade_destino[ponto_mais_proximo - inp.range_port] == 0:
-                        pontos_sem_capacidade.append(ponto_mais_proximo)
+                        pontos_sem_capacidade.add(ponto_mais_proximo)
                     
         
     def objective_function(self):
