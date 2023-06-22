@@ -3,7 +3,7 @@ from utils import gen_points
 # N = [0, 1, 2]
 # K = [3, 4]
 # M = [5, 6, 7]
-# demandas_clientes = [50, 100, 500, 250]
+# demandas_clientes = [100]
 
 # cr = 0.8
 # cf = 0.3
@@ -39,9 +39,9 @@ with open('input_transport_problem.txt', 'r') as arquivo:
     M = linhas[4].split()
     M = [int(valor) for valor in M if valor != '\n']
     
-    demandas_clientes = linhas[5].split()
-    demandas_clientes = [int(valor) for valor in demandas_clientes if valor != '\n']
-    # demandas_clientes = [sum(demandas)]
+    demandas = linhas[5].split()
+    demandas = [int(valor) for valor in demandas if valor != '\n']
+    demandas_clientes = [sum(demandas)]
     
     ofertas = linhas[6].split()
     ofertas = [int(valor) for valor in ofertas if valor != '\n']

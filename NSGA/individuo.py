@@ -80,6 +80,9 @@ class Individuo:
         self.ferrovias = inp.K
         self.demandas_clientes = inp.demandas_clientes.copy()
         self.cromossomos = []
+        self.cap_destino = inp.capacidade_portos.copy()
+        self.cap_trans = inp.capacidade_ferrovias.copy()
+        self.ofert_prod = inp.ofertas.copy()
         for _ in range(len(self.demandas_clientes)):
             self.cromossomos.append(Cromossomo())
         
@@ -92,15 +95,14 @@ class Individuo:
         for i, demanda in enumerate(self.demandas_clientes):
             alocacao_transbordos = [0] * len(self.ferrovias)
             alocacao_portos = [0] * len(self.portos)
-            alocacao_produtores = self.distribuir_demanda_aleatoriamente_para_produtores(demanda=demanda, ofertas=inp.ofertas, quantidade_produtores=len(self.produtores))
-            
+            alocacao_produtores = self.distribuir_demanda_aleatoriamente_para_produtores(demanda=demanda, ofertas=self.ofert_prod, quantidade_produtores=len(self.produtores))
             self.distribuir_demanda_de_produtores_para_transbordo_e_portos(gene_origem=alocacao_produtores, gene_intermediario=alocacao_transbordos, 
-                                                                           gene_destino=alocacao_portos, capacidade_intermediarios=inp.capacidade_ferrovias.copy(), 
-                                                                           capacidade_destino=inp.capacidade_portos.copy(), pontos_sem_capacidade=pontos_sem_capacidade,
+                                                                           gene_destino=alocacao_portos, capacidade_intermediarios=self.cap_trans, 
+                                                                           capacidade_destino=self.cap_destino, pontos_sem_capacidade=pontos_sem_capacidade,
                                                                            origens=self.produtores, intermediarios=self.ferrovias, destinos=self.portos, 
                                                                            cromossomo=self.cromossomos[i])
             self.distribuir_demanda_de_transbordos_para_portos(gene_intermediario=alocacao_transbordos, gene_destino=alocacao_portos, 
-                                                               capacidade_destino=inp.capacidade_portos.copy(), pontos_sem_capacidade=pontos_sem_capacidade,
+                                                               capacidade_destino=self.cap_destino, pontos_sem_capacidade=pontos_sem_capacidade,
                                                                intermediarios=self.ferrovias, destinos=self.portos, cromossomo=self.cromossomos[i])
             
             self.cromossomos[i].set_genes(gene_produtores=alocacao_produtores.copy(), 
@@ -138,7 +140,7 @@ class Individuo:
                                                                                         provider_allocation=aloc_prod, 
                                                                                         target_point_allocation=gene_intermediario, 
                                                                                         target_point_capacity=capacidade_intermediarios, 
-                                                                                        total_demanda=demanda_alocar,
+                                                                                        total_demanda=alocacao_a_ser_distribuida,
                                                                                         cromossomo=cromossomo)
                     else:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
@@ -151,7 +153,7 @@ class Individuo:
                                                                                   provider_allocation=aloc_prod, 
                                                                                   target_point_allocation=gene_destino, 
                                                                                   target_point_capacity=capacidade_destino, 
-                                                                                  total_demanda=demanda_alocar,
+                                                                                  total_demanda=alocacao_a_ser_distribuida,
                                                                                   cromossomo=cromossomo)
                     else:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
