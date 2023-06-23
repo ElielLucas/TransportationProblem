@@ -15,21 +15,25 @@ def find_nearest_neighbor(ponto_referencia, possiveis_destinos, pontos_sem_capac
 
     return indice_vizinho_mais_proximo
     
-# populacao[0].cromossomos[0].lista_adjacencia
-def calcular_custo_transporte(gene):
+
+def calcular_custo_e_emissao_transporte(gene):
     N = set(inp.N)
     K = set(inp.K)
     M = set(inp.M)
 
-    custo_transporte= 0
+    custo_transporte = 0
+    emissao_transporte = 0
     for node_ini, aresta in gene.lista_adjacencia.items():
         for node_fim, qtd_transportada in aresta.items():
             if (node_ini in N and node_fim in K) or (node_ini in N and node_fim in M):
                 custo_modal = inp.cr
+                emissao_modal = inp.er
             else:
                 custo_modal = inp.cf
+                emissao_modal = inp.ef
             custo_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * custo_modal
-    return custo_transporte
+            emissao_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * emissao_modal
+    return [custo_transporte, emissao_transporte]
 
 
 def alocar_demanda(provider, target, range_point, provider_allocation,
@@ -73,7 +77,7 @@ class Cromossomo:
         self.lista_adjacencia[u][v] = weight
 
      
-class Individuo:
+class  Individuo:
     def __init__(self, montar_solução_random: bool) -> None:
         self.produtores = inp.N
         self.portos = inp.M
@@ -83,11 +87,22 @@ class Individuo:
         self.cap_destino = inp.capacidade_portos.copy()
         self.cap_trans = inp.capacidade_ferrovias.copy()
         self.ofert_prod = inp.ofertas.copy()
+        
+        self.rank = None
+        self.crowding_distance = None
+        self.domination_count = None
+        self.dominated_solutions = None
+        self.features = None
+        
+        self.of = []
+        self.fit = []
         for _ in range(len(self.demandas_clientes)):
             self.cromossomos.append(Cromossomo())
         
         if montar_solução_random:
             self.montar_solução_random() 
+            self.calculate_objectives()
+
     
 
     def montar_solução_random(self):
@@ -176,20 +191,46 @@ class Individuo:
                                                                               cromossomo=cromossomo)
                     if capacidade_destino[ponto_mais_proximo - inp.range_port] == 0:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
-                    
-        
+    
+    
+    # Check if individual1 dominates individual2
+    def dominates(self, other_individual):
+        and_condition = True
+        or_condition = False
+        for first, second in zip(self.of, other_individual.of):
+            and_condition = and_condition and first <= second
+            or_condition = or_condition or first < second
+        return (and_condition and or_condition)
+    
+    
+    def calculate_objectives(self):
+        self.of = self.objective_function()
+        self.fit = self.calculate_fit(self.of)
+    
     def objective_function(self):
         custo_total = 0
+        emissao_total = 0
         for i in range(len(self.demandas_clientes)):
-            custo_total += calcular_custo_transporte(gene=self.cromossomos[i])
-        return custo_total
-    
-    def calcular_fit(self, valor_of):
-        if valor_of >= 0:
-            valor_fit = 1 / (1 + valor_of)
-        elif valor_of < 0:
-            valor_fit = 1 + abs(valor_of)
-        return valor_fit
+            custo, emissao = calcular_custo_e_emissao_transporte(gene=self.cromossomos[i])
+            custo_total += custo
+            emissao_total += emissao
+            
+        return [custo_total, emissao_total]
+
+
+    def calculate_fit(self, of):
+        of_custo, of_emissao = of
+        if of_custo >= 0:
+            fit_custo = 1 / (1 + of_custo)
+        elif of_custo < 0:
+            fit_custo = 1 + abs(of_custo)
+            
+        if of_emissao >= 0:
+            fit_emissao = 1 / (1 + of_emissao)
+        elif of_emissao < 0:
+            fit_emissao = 1 + abs(of_emissao)
+
+        return [fit_custo, fit_emissao]
 
         
 

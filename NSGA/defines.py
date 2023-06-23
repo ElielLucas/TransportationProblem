@@ -26,6 +26,8 @@ from utils import gen_points
 #     [1, 6, 6, 4, 4, 7, 999, 1],
 #     [3, 9, 8, 3, 3, 4, 1, 999]    
 # ])
+er = 0.8
+ef = 0.2
 
 
 with open('input_transport_problem.txt', 'r') as arquivo:
