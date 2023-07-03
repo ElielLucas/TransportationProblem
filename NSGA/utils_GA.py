@@ -7,13 +7,10 @@ from typing import List
 import time
 
 class NSGA2Utils:
-    def __init__(self, num_of_individuals=50,
-                 num_of_tour_particips=2, tournament_prob=0.9, crossover_param=2, mutation_param=5):
+    def __init__(self, num_of_individuals=50, tournament_prob=0.9, mutation_param=5):
         
         self.num_of_individuals = num_of_individuals
-        self.num_of_tour_particips = num_of_tour_particips
         self.tournament_prob = tournament_prob
-        self.crossover_param = crossover_param
         self.mutation_param = mutation_param
         
     def create_initial_population(self):
@@ -24,12 +21,14 @@ class NSGA2Utils:
     
     def create_children(self, population):
         children = []
+        of_children = []
+        population.calculate_of_population()
         while len(children) < len(population):
             parent1 = self.tournament(population)
             parent2 = parent1
             while parent1 == parent2:
                 parent2 = self.tournament(population)
-                
+            
             if random() <= 0.6:  
                 indiv_aleatorio = Individuo(montar_solução_random=True)
                 if choice([0, 1]) == 0:
@@ -38,28 +37,32 @@ class NSGA2Utils:
                     child1, child2 = self.crossover(parent1=parent2, parent2=indiv_aleatorio)
             else:
                 child1, child2 = self.crossover(parent1=parent1, parent2=parent2)
-            
             child1.calculate_objectives()
             child2.calculate_objectives()
-            
-            children.append(child1)
-            children.append(child2)
+            if (child1.of not in population.of_population and child1.of not in of_children):
+                children.append(child1)
+                of_children.append(child1.of)
+            if (child2.of not in population.of_population and child2.of not in of_children):
+                children.append(child2)
+                of_children.append(child2.of)
 
         return children
     
     def tournament(self, population):
-        participants = sample(population.individuos, self.num_of_tour_particips)
-        best = None
-        for participant in participants:
-            # If best is not assigned yet, assign the current participant as the best
-            if best is None:
-                best = participant
-            elif (self.crowding_operator(participant, best) == 1 and self.choose_with_prob(self.tournament_prob)):
-                best = participant
+        # Seleciona dois indivíduos aleatórios
+        ind1 = randint(0, len(population)-1)
+        ind2 = randint(0, len(population)-1)
+        if population.individuos[ind1].rank < population.individuos[ind2].rank:
+            return population.individuos[ind1]
+        elif population.individuos[ind1].rank > population.individuos[ind2].rank:
+            return population.individuos[ind2]
+        else:
+            if population.individuos[ind1].crowding_distance > population.individuos[ind2].crowding_distance:
+                return population.individuos[ind1]
+            else:
+                return population.individuos[ind2]
 
-        return best
-    
-    
+
     def crowding_operator(self, individual, other_individual):
         if (individual.rank < other_individual.rank) or ((individual.rank == other_individual.rank) and (
                         individual.crowding_distance > other_individual.crowding_distance)):
@@ -86,6 +89,7 @@ class NSGA2Utils:
             if individual.domination_count == 0:
                 individual.rank = 0
                 population.fronts[0].append(individual)
+        
         i = 0
         while len(population.fronts[i]) > 0:
             temp = []
@@ -95,9 +99,9 @@ class NSGA2Utils:
                     if other_individual.domination_count == 0:
                         other_individual.rank = i + 1
                         temp.append(other_individual)
+            
             i = i + 1
             population.fronts.append(temp)
-            
         del population.fronts[i:]
 
 
@@ -115,7 +119,6 @@ class NSGA2Utils:
                 if scale == 0: scale = 1
                 for i in range(1, solutions_num - 1):
                     front[i].crowding_distance += (front[i + 1].of[m] - front[i - 1].of[m]) / scale
-                    
 
     def crossover(self, parent1, parent2):
         child1 = Individuo(montar_solução_random=False)
@@ -123,6 +126,9 @@ class NSGA2Utils:
         self.montar_rotas_faltantes_1(child1, parent1, parent2)
         self.montar_rotas_faltantes_1(child2, parent2, parent1)
         return child1, child2
+
+    def mutate(self, population):
+        return Individuo(montar_solução_random=True)
 
      
     def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):

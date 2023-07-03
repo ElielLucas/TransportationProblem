@@ -8,6 +8,13 @@ class Population:
 
     def __iter__(self):
         return self.individuos.__iter__()
+    
+    def calculate_of_population(self):
+        self.of_population = []
+        for i in self.individuos:
+            self.of_population.append(i.of)
+        
+            
 
     def extend(self, new_individuals):
         self.individuos.extend(new_individuals)
