@@ -32,7 +32,7 @@ def calcular_custo_e_emissao_transporte(gene):
                 custo_modal = inp.cf
                 emissao_modal = inp.ef
             custo_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * custo_modal
-            emissao_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * emissao_modal
+            emissao_transporte += qtd_transportada * inp.tempo_matrix[node_ini][node_fim] * emissao_modal
     return [custo_transporte, emissao_transporte]
 
 

@@ -1,36 +1,10 @@
 import numpy as np
 from utils import gen_points
-# N = [0, 1, 2]
-# K = [3, 4]
-# M = [5, 6, 7]
-# demandas_clientes = [100]
+import random
 
-# cr = 0.8
-# cf = 0.3
-
-# range_trans = len(N)
-# range_port = len(N) + len(K)
-# range_client = len(N) + len(K) + len(M)
-
-# ofertas = [2000, 2000, 2000]
-# capacidade_ferrovias = [3000, 3000]
-# capacidade_portos = [3000, 3000, 3000]
-
-# dist_matrix = np.array([
-#     [999, 4, 5, 8, 7, 1, 1, 3],
-#     [4, 999, 20, 4, 3, 2, 6, 9],
-#     [5, 20, 999, 2, 5, 9, 6, 8],
-#     [8, 4, 2, 999, 1, 7, 4, 3],
-#     [7, 3, 5, 1, 999, 3, 4, 3],
-#     [1, 2, 9, 7, 3, 999, 7, 4],
-#     [1, 6, 6, 4, 4, 7, 999, 1],
-#     [3, 9, 8, 3, 3, 4, 1, 999]    
-# ])
 er = 0.8
 ef = 0.2
-
-
-with open('input_transport_problem.txt', 'r') as arquivo:
+with open('instancias_pequenas1.txt', 'r') as arquivo:
     linhas = arquivo.readlines()
     cr = float(linhas[0].rstrip('\n'))
     cf = float(linhas[1].rstrip('\n'))
@@ -76,7 +50,26 @@ range_trans = len(N)
 range_port = len(N) + len(K)
 
 quantidade_nodes = len(N) + len(K) + len(M)
+tempo_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
 
+with open('instancias_pequenas1_tempo.txt', 'r') as arquivo:
+    linhas = arquivo.readlines()
+    aux = 0
+    for it, i in enumerate(range(0, len(linhas))):
+        if it in N:
+            pontos = linhas[i].split()
+            for it2, tempo in enumerate(pontos):
+                tempo_matrix[it][K[it2]] = tempo
+        elif it in K:
+            pontos = linhas[i].split()
+            for it2, tempo in enumerate(pontos):
+                tempo_matrix[it][M[it2]] = tempo
+        else:
+            pontos = linhas[i].split()
+            for it2, tempo in enumerate(pontos):
+                tempo_matrix[aux][M[it2]] = tempo
+            aux += 1
+    
 dist_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
 for i in N:
     for k in K:

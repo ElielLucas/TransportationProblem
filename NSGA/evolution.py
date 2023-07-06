@@ -8,7 +8,7 @@ import pandas as pd
 taxa_mutacao = 0.5
 class Evolution:
 
-    def __init__(self, num_of_generations=1000, num_of_individuals=100, tournament_prob=0.9, mutation_param=5):
+    def __init__(self, num_of_generations=100, num_of_individuals=100, tournament_prob=0.9, mutation_param=5):
         
         self.utils = NSGA2Utils(num_of_individuals, tournament_prob, mutation_param)
         self.population = None
@@ -29,18 +29,18 @@ class Evolution:
             
             # self.utils.mutate(children)
                 
-            # if i % 20 == 0:
-            #     random_individuals = []
-            #     while len(random_individuals) < self.num_of_individuals:
-            #         new_indiv = Individuo(montar_solução_random=True)
-            #         ok = True
-            #         for i in self.population.individuos:
-            #             if i.of == new_indiv.of: 
-            #                 ok = False
-            #                 break
-            #         if ok: random_individuals.append(new_indiv)   
+            if i % 20 == 0:
+                random_individuals = []
+                while len(random_individuals) < self.num_of_individuals:
+                    new_indiv = Individuo(montar_solução_random=True)
+                    ok = True
+                    for i in self.population.individuos:
+                        if i.of == new_indiv.of: 
+                            ok = False
+                            break
+                    if ok: random_individuals.append(new_indiv)   
     
-            #     self.population.extend(random_individuals)
+                self.population.extend(random_individuals)
             
             # aux1 = []
             # aux2 = []
@@ -77,10 +77,10 @@ class Evolution:
                 self.utils.calculate_crowding_distance(front)
                 
             # breakpoint()
-            
+            print(returned_population.fronts[0])
             children = self.utils.create_children(self.population)
             
-            
+
         return returned_population.fronts[0]
     
     
