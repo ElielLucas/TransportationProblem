@@ -6,6 +6,7 @@ from tqdm import tqdm
 from random import random
 import pandas as pd
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 
 def plot_frente_de_pareto(populacao, geracao):
@@ -42,7 +43,10 @@ class Evolution:
         self.population.calcula_dados()
         children = self.utils.create_children(self.population)
         returned_population = None
-        for i in tqdm(range(self.num_of_generations)):
+        
+        geracao = 0
+        tempo_inicial = time.process_time()
+        while time.process_time() - tempo_inicial< 600:
             self.population.extend(children)
             
             self.utils.fast_nondominated_sort(self.population)
@@ -88,10 +92,11 @@ class Evolution:
             for front in self.population.fronts:
                 self.utils.calculate_crowding_distance(front)
             
-            plot_frente_de_pareto(self.population, i)
+            plot_frente_de_pareto(self.population, geracao)
             
             self.population.calcula_dados()
             children = self.utils.create_children(self.population)
+            geracao += 1
             
 
         return returned_population
