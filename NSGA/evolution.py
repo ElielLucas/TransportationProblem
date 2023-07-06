@@ -14,14 +14,11 @@ grande_frente_pareto = []
 geracao = 0
 menor_custo_frente = 1000000000000.0
 menor_emissao_frente = 1000000000000.0
-taxa_mutacao = 0.5
 class Evolution:
     def __init__(self, nome_instancia, iteracao):
         self.inp = Defines(nome_instancia, iteracao)
         self.nome_instancia = nome_instancia
         self.iteracao = iteracao
-        self.taxa_cruzamento = 0.8
-        self.taxa_mutacao = 0.05
         self.tamanho_populacao = 80
         self.populacao = None
         self.ranks = None
