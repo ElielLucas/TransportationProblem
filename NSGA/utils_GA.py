@@ -24,23 +24,24 @@ class NSGA2Utils:
         qtd = int(population.__len__())
         prole = []
         population.calculate_of_population()
-        parent1 = self.tournament(population=population)
-        parent2 = self.tournament(adv = parent1, population=population)
-        # if prob <= self.probabilidade_crossover(parent1, parent2, population):                
-        if random() <= 0.6:  
-            indiv_aleatorio = Individuo(montar_solução_random=True)
-            if choice([0, 1]) == 0:
-                child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=indiv_aleatorio)
+        while qtd>0:
+            parent1 = self.tournament(population=population)
+            parent2 = self.tournament(adv = parent1, population=population)
+            # if prob <= self.probabilidade_crossover(parent1, parent2, population):                
+            if random() <= 0.6:  
+                indiv_aleatorio = Individuo(montar_solução_random=True)
+                if choice([0, 1]) == 0:
+                    child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=indiv_aleatorio)
+                else:
+                    child1, child2 = self.crossover(parent1=population.individuos[parent2], parent2=indiv_aleatorio)
             else:
-                child1, child2 = self.crossover(parent1=population.individuos[parent2], parent2=indiv_aleatorio)
-        else:
-            child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=population.individuos[parent2])
+                child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=population.individuos[parent2])
 
-        child1.calculate_objectives()
-        child2.calculate_objectives()
-        prole.append(child1)
-        prole.append(child2)
-        qtd-=1
+            child1.calculate_objectives()
+            child2.calculate_objectives()
+            prole.append(child1)
+            prole.append(child2)
+            qtd-=1
 
         return prole
     
