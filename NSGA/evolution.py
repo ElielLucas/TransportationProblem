@@ -45,7 +45,12 @@ class Evolution:
         returned_population = None
         for i in tqdm(range(self.num_of_generations)):
             self.population.extend(children)
+            
+            self.utils.fast_nondominated_sort(self.population)
                 
+            self.population.calcula_dados()
+            
+            self.population = self.utils.mutate(self.population)
             # if i % 20 == 0:
             #     random_individuals = []
             #     while len(random_individuals) < self.num_of_individuals:
@@ -62,13 +67,10 @@ class Evolution:
                 
             self.utils.fast_nondominated_sort(self.population)
             
-            self.population.calcula_dados()
-            
-            self.population = self.utils.mutate(self.population)
             
             new_population = Population()
             front_num = 0
-            while len(new_population) + len(self.population.fronts[front_num]) <= self.num_of_individuals:
+            while new_population.__len__() + len(self.population.fronts[front_num]) <= self.num_of_individuals:
                 self.utils.calculate_crowding_distance(self.population.fronts[front_num])
                 new_population.extend(self.population.fronts[front_num])
                 front_num += 1
@@ -77,7 +79,7 @@ class Evolution:
             
             self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
             
-            new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals - len(new_population)])
+            new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals - new_population.__len__()])
             
             returned_population = self.population
             self.population = new_population

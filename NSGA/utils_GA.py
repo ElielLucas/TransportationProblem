@@ -21,25 +21,25 @@ class NSGA2Utils:
     
     def create_children(self, population):
         prob = float(randint(1,100))/100.0
-        qtd = int(len(population)/2)
+        qtd = int(population.__len__())
         prole = []
         population.calculate_of_population()
         parent1 = self.tournament(population=population)
         parent2 = self.tournament(adv = parent1, population=population)
-        if prob <= self.probabilidade_crossover(parent1,parent2):                
-            if random() <= 0.6:  
-                indiv_aleatorio = Individuo(montar_solução_random=True, inp=self.inp)
-                if choice([0, 1]) == 0:
-                    child1, child2 = self.aux_cross(parent1=self.populacao[parent1], parent2=indiv_aleatorio)
-                else:
-                    child1, child2 = self.aux_cross(parent1=self.populacao[parent2], parent2=indiv_aleatorio)
+        # if prob <= self.probabilidade_crossover(parent1, parent2, population):                
+        if random() <= 0.6:  
+            indiv_aleatorio = Individuo(montar_solução_random=True)
+            if choice([0, 1]) == 0:
+                child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=indiv_aleatorio)
             else:
-                child1, child2 = self.aux_cross(parent1=self.populacao[parent1], parent2=self.populacao[parent2])
+                child1, child2 = self.crossover(parent1=population.individuos[parent2], parent2=indiv_aleatorio)
+        else:
+            child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=population.individuos[parent2])
 
-            child1.calculate_objectives()
-            child2.calculate_objectives()
-            prole.append(child1)
-            prole.append(child2)
+        child1.calculate_objectives()
+        child2.calculate_objectives()
+        prole.append(child1)
+        prole.append(child2)
         qtd-=1
 
         return prole
@@ -59,7 +59,7 @@ class NSGA2Utils:
     
     def probabilidade_crossover(self, idx1, idx2, population):
         idx = idx1
-        if(population.individuos[idx2].rank[idx2] < population.individuos[idx1].rank):
+        if(population.individuos[idx2].rank < population.individuos[idx1].rank):
             idx = idx2
         if(population.individuos[idx].rank > population.rank_medio) and population.melhor_rank < population.rank_medio:
             return (population.rank_medio - population.melhor_rank)/(population.rank_medio - population.melhor_rank)
@@ -147,8 +147,9 @@ class NSGA2Utils:
     
     def mutate(self, population):
         for e in range(population.__len__()):
-            p = float(randint(1, 100))/100.0
-            if p  <= self.probabilidade_mutacao(e, population):
+            prob = float(randint(1, 100))/100.0
+            if prob  <= self.probabilidade_mutacao(e, population):
+                # breakpoint()
                 new_indiv = Individuo(montar_solução_random=True)
                 population.individuos[e] = new_indiv
         return population

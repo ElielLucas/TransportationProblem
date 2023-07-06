@@ -104,7 +104,9 @@ class  Individuo:
             self.calculate_objectives()
 
     
-
+    def __lt__(self,other):
+        return (self.of[0] < other.of[0] and self.of[1] <= other.of[1]) or (self.of[0] <= other.of[0] and self.of[1] < other.of[1])
+    
     def montar_solução_random(self):
         pontos_sem_capacidade: Set[int] = set()
         for i, demanda in enumerate(self.demandas_clientes):
