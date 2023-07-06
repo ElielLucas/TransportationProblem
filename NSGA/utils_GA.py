@@ -19,7 +19,7 @@ class NSGA2Utils:
     
     def create_children(self, population):
         prob = float(randint(1,100))/100.0
-        qtd = int(population.__len__())
+        qtd = int(population.__len__()/2)
         prole = []
         of_children = []
         population.calculate_of_population()

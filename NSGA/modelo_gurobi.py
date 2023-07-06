@@ -84,10 +84,15 @@ class Gurobi:
             
             
     def criar_instancia(self, nome_instancia, iteracao, qtd_origens, qtd_trans, qtd_port, qtd_cli):
-        self.orig = qtd_origens
-        self.trans = qtd_trans
-        self.port = qtd_port
-        self.cli = qtd_cli
+        self.orig = random.randint(1, qtd_origens)
+        self.trans = random.randint(1, qtd_trans)
+        self.port = random.randint(1, qtd_port)
+        self.cli = random.randint(1, qtd_cli)
+        # while num_ori * num_trans * num_port * num_cli > 16800000:
+        #     num_ori = random.randint(1, 100)
+        #     num_trans = random.randint(1, 20)
+        #     num_port = random.randint(1, 30)
+        #     num_cli = random.randint(1, 600)
 
         self.range_trans = self.orig
         self.range_port = self.orig + self.trans
