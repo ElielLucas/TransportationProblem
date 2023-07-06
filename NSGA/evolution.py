@@ -32,7 +32,7 @@ class Evolution:
         self.on_generation_finished = []
         self.num_of_individuals = num_of_individuals
 
-    def evolve(self):
+    def evolve(self, nome_instancia, iteracao):
         self.population = self.utils.create_initial_population()
         self.utils.fast_nondominated_sort(self.population)
         for front in self.population.fronts:
@@ -95,10 +95,3 @@ class Evolution:
 
         return returned_population
     
-    
-        
-
-otm = Evolution()
-result_omtz = otm.evolve()
-for sol in result_omtz:
-    print(sol.of)
