@@ -2,6 +2,8 @@ class Population:
     def __init__(self):
         self.individuos = []
         self.fronts = []
+        self.rank_medio = 0
+        self.melhor_rank = 0
 
     def __len__(self):
         return len(self.individuos)
@@ -13,8 +15,7 @@ class Population:
         self.of_population = []
         for i in self.individuos:
             self.of_population.append(i.of)
-        
-            
+
 
     def extend(self, new_individuals):
         self.individuos.extend(new_individuals)

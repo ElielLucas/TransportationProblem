@@ -136,6 +136,11 @@ class NSGA2Utils:
                 population[e] = new_indiv
         print('Mutação realizada')
         return population
+    
+    def probabilidade_mutacao(self, idx, population):
+        if population[idx].rank <= self.rank_medio and self.melhor_rank < self.rank_medio:
+            return 0.5*((float(self.ranks[idx]) - float(self.melhor_rank))/(float(self.rank_medio) - float(self.melhor_rank)))
+        return 0.5
 
      
     def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):
