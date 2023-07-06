@@ -20,34 +20,42 @@ class NSGA2Utils:
     
     
     def create_children(self, population):
-        children = []
-        of_children = []
+        prob = float(randint(1,100))/100.0
+        qtd = int(len(population)/2)
+        prole = []
         population.calculate_of_population()
-        while len(children) < len(population):
-            parent1 = self.tournament(population)
-            parent2 = parent1
-            while parent1 == parent2:
-                parent2 = self.tournament(population)
-            
-            
+        parent1 = self.tournament(population=population)
+        parent2 = self.tournament(adv = parent1, population=population)
+        if prob <= self.probabilidade_crossover(parent1,parent2):                
             if random() <= 0.6:  
-                indiv_aleatorio = Individuo(montar_solução_random=True)
+                indiv_aleatorio = Individuo(montar_solução_random=True, inp=self.inp)
                 if choice([0, 1]) == 0:
-                    child1, child2 = self.crossover(parent1=parent1, parent2=indiv_aleatorio)
+                    child1, child2 = self.aux_cross(parent1=self.populacao[parent1], parent2=indiv_aleatorio)
                 else:
-                    child1, child2 = self.crossover(parent1=parent2, parent2=indiv_aleatorio)
+                    child1, child2 = self.aux_cross(parent1=self.populacao[parent2], parent2=indiv_aleatorio)
             else:
-                child1, child2 = self.crossover(parent1=parent1, parent2=parent2)
+                child1, child2 = self.aux_cross(parent1=self.populacao[parent1], parent2=self.populacao[parent2])
+
             child1.calculate_objectives()
             child2.calculate_objectives()
-            if (child1.of not in population.of_population and child1.of not in of_children):
-                children.append(child1)
-                of_children.append(child1.of)
-            if (child2.of not in population.of_population and child2.of not in of_children):
-                children.append(child2)
-                of_children.append(child2.of)
+            prole.append(child1)
+            prole.append(child2)
+        qtd-=1
 
-        return children
+        return prole
+    
+    
+    def tournament(self, adv=-1, population = None):
+        lim = population.__len__()
+        ret = randint(0,lim-1)
+        for _ in range(0,3):
+            other = randint(0,lim-1)
+            while other == adv or other == ret:
+                other = randint(0,lim-1)
+            if population.individuos[other] < population.individuos[ret]:
+                ret = other
+        return ret
+        
     
     def probabilidade_crossover(self, idx1, idx2, population):
         idx = idx1
@@ -57,19 +65,19 @@ class NSGA2Utils:
             return (population.rank_medio - population.melhor_rank)/(population.rank_medio - population.melhor_rank)
         return 1.0
     
-    def tournament(self, population):
-        # Seleciona dois indivíduos aleatórios
-        ind1 = randint(0, len(population)-1)
-        ind2 = randint(0, len(population)-1)
-        if population.individuos[ind1].rank < population.individuos[ind2].rank:
-            return population.individuos[ind1]
-        elif population.individuos[ind1].rank > population.individuos[ind2].rank:
-            return population.individuos[ind2]
-        else:
-            if population.individuos[ind1].crowding_distance > population.individuos[ind2].crowding_distance:
-                return population.individuos[ind1]
-            else:
-                return population.individuos[ind2]
+    # def tournament(self, population):
+    #     # Seleciona dois indivíduos aleatórios
+    #     ind1 = randint(0, len(population)-1)
+    #     ind2 = randint(0, len(population)-1)
+    #     if population.individuos[ind1].rank < population.individuos[ind2].rank:
+    #         return population.individuos[ind1]
+    #     elif population.individuos[ind1].rank > population.individuos[ind2].rank:
+    #         return population.individuos[ind2]
+    #     else:
+    #         if population.individuos[ind1].crowding_distance > population.individuos[ind2].crowding_distance:
+    #             return population.individuos[ind1]
+    #         else:
+    #             return population.individuos[ind2]
 
 
     def crowding_operator(self, individual, other_individual):
