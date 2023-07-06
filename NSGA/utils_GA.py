@@ -29,6 +29,7 @@ class NSGA2Utils:
             while parent1 == parent2:
                 parent2 = self.tournament(population)
             
+            
             if random() <= 0.6:  
                 indiv_aleatorio = Individuo(montar_solução_random=True)
                 if choice([0, 1]) == 0:
@@ -47,6 +48,14 @@ class NSGA2Utils:
                 of_children.append(child2.of)
 
         return children
+    
+    def probabilidade_crossover(self, idx1, idx2, population):
+        idx = idx1
+        if(population.individuos[idx2].rank[idx2] < population.individuos[idx1].rank):
+            idx = idx2
+        if(population.individuos[idx].rank > population.rank_medio) and population.melhor_rank < population.rank_medio:
+            return (population.rank_medio - population.melhor_rank)/(population.rank_medio - population.melhor_rank)
+        return 1.0
     
     def tournament(self, population):
         # Seleciona dois indivíduos aleatórios
