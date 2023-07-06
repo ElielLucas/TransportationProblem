@@ -4,11 +4,29 @@ from population import Population
 from tqdm import tqdm
 from random import random
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 taxa_mutacao = 0.5
+
+def plot_frente_de_pareto(populacao, geracao):
+    custo_frente = np.array([populacao.fronts[0][i].of[0] for i in range(len(populacao.fronts[0]))])
+    emissao_frente = np.array([populacao.fronts[0][i].of[1] for i in range(len(populacao.fronts[0]))])
+    custo = np.array([populacao.fronts[i][j].of[0] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
+    emissao = np.array([populacao.fronts[i][j].of[1] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
+    plt.scatter(emissao,custo,c=np.array(['blue' for i in range(len(custo))]),label='Outras soluções')
+    plt.scatter(emissao_frente, custo_frente, c=np.array(['red' for i in range(len(populacao.fronts[0]))]),label='Frente de pareto')
+    plt.xlabel('Emissão de CO2')
+    plt.ylabel('Custo do transporte')
+    plt.title('ANSGA II - Geração '+ str(geracao))
+    plt.legend()
+    caminho = 'Figuras/' + ' - Geração('+str(geracao)+').png'
+    plt.savefig(caminho)
+    plt.close()
+        
 class Evolution:
 
-    def __init__(self, num_of_generations=100, num_of_individuals=100, tournament_prob=0.9, mutation_param=5):
+    def __init__(self, num_of_generations=1000, num_of_individuals=75, tournament_prob=0.9, mutation_param=5):
         
         self.utils = NSGA2Utils(num_of_individuals, tournament_prob, mutation_param)
         self.population = None
@@ -77,11 +95,11 @@ class Evolution:
                 self.utils.calculate_crowding_distance(front)
                 
             # breakpoint()
-            print(returned_population.fronts[0])
+            plot_frente_de_pareto(self.population, i)
             children = self.utils.create_children(self.population)
             
 
-        return returned_population.fronts[0]
+        return returned_population
     
     
         
