@@ -7,11 +7,8 @@ from typing import List
 import time
 
 class NSGA2Utils:
-    def __init__(self, num_of_individuals=50, tournament_prob=0.9, mutation_param=5):
-        
+    def __init__(self, num_of_individuals=50): 
         self.num_of_individuals = num_of_individuals
-        self.tournament_prob = tournament_prob
-        self.mutation_param = mutation_param
         
     def create_initial_population(self):
         population = Population()

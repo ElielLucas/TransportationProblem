@@ -1,6 +1,7 @@
 from utils_GA import NSGA2Utils
 from utils_GA import Individuo
 from population import Population
+from defines import Defines
 from tqdm import tqdm
 from random import random
 import pandas as pd
@@ -24,15 +25,17 @@ def plot_frente_de_pareto(populacao, geracao):
         
 class Evolution:
 
-    def __init__(self, num_of_generations=1000, num_of_individuals=75, tournament_prob=0.9, mutation_param=5):
+    def __init__(self, num_of_individuals, nome_instancia, iteracao):
         
-        self.utils = NSGA2Utils(num_of_individuals, tournament_prob, mutation_param)
-        self.population = None
-        self.num_of_generations = num_of_generations
-        self.on_generation_finished = []
+        self.inp = Defines(nome_instancia, iteracao)
         self.num_of_individuals = num_of_individuals
+        self.nome_instancia = nome_instancia
+        self.utils = NSGA2Utils(num_of_individuals)
+        self.population = None
+        self.on_generation_finished = []
+        self.num_of_individuals = 75
 
-    def evolve(self, nome_instancia, iteracao):
+    def evolve(self):
         self.population = self.utils.create_initial_population()
         self.utils.fast_nondominated_sort(self.population)
         for front in self.population.fronts:
