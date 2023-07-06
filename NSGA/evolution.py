@@ -25,15 +25,13 @@ def plot_frente_de_pareto(populacao, geracao):
         
 class Evolution:
 
-    def __init__(self, num_of_individuals, nome_instancia, iteracao):
+    def __init__(self, nome_instancia, iteracao):
         
         self.inp = Defines(nome_instancia, iteracao)
-        self.num_of_individuals = num_of_individuals
         self.nome_instancia = nome_instancia
-        self.utils = NSGA2Utils(num_of_individuals)
-        self.population = None
-        self.on_generation_finished = []
         self.num_of_individuals = 75
+        self.utils = NSGA2Utils(self.num_of_individuals, self.inp)
+        self.population = None
 
     def evolve(self):
         self.population = self.utils.create_initial_population()

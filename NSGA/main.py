@@ -3,7 +3,7 @@ from evolution import Evolution
 from defines import Defines
 import pandas as pd
 
-# nome = 'instancias_pequenas'
+nome = 'instancias_pequenas'
 # list_resul = []
 # df = pd.DataFrame()
 # for i in range(10):
@@ -16,5 +16,10 @@ import pandas as pd
 
 for i in range(10):
     otmz = Evolution(nome, i)
-    otmz.evolve()
+    front = otmz.evolve()
+    df = pd.DataFrame()
+    for i in range(len(front)):
+        df = df.append({'Custo Transporte': front[i].of[0], 'Emissão Transporte': front[i].of[1]})
+    
+    df.to_csv('resultados_' + nome + str(i) + '_NSGA.csv')
     
