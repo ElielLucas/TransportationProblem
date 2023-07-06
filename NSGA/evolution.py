@@ -9,7 +9,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
-def plot_frente_de_pareto(populacao, geracao):
+def plot_frente_de_pareto(populacao, geracao, nome_instancia, iteracao):
     custo_frente = np.array([populacao.fronts[0][i].of[0] for i in range(len(populacao.fronts[0]))])
     emissao_frente = np.array([populacao.fronts[0][i].of[1] for i in range(len(populacao.fronts[0]))])
     custo = np.array([populacao.fronts[i][j].of[0] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
@@ -20,7 +20,7 @@ def plot_frente_de_pareto(populacao, geracao):
     plt.ylabel('Custo do Transporte')
     plt.title('ANSGA II - Geração '+ str(geracao))
     plt.legend()
-    caminho = 'Figuras/' + ' - Geração('+str(geracao)+').png'
+    caminho = 'Figuras/' + nome_instancia + ' - Geração('+str(geracao)+').png'
     plt.savefig(caminho)
     plt.close()
         
@@ -46,6 +46,8 @@ class Evolution:
         geracao = 0
         tempo_inicial = time.process_time()
         while time.process_time() - tempo_inicial< 600:
+            print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
+
             self.population.extend(children)
             
             self.utils.fast_nondominated_sort(self.population)
@@ -76,10 +78,11 @@ class Evolution:
                 self.utils.calculate_crowding_distance(self.population.fronts[front_num])
                 new_population.extend(self.population.fronts[front_num])
                 front_num += 1
-                if new_population.__len__() == self.num_of_individuals:
-                    front_num -= 1
-                    break
+                # if new_population.__len__() == self.num_of_individuals:
+                #     front_num -= 1
+                #     break
             
+            # breakpoint()
             self.utils.calculate_crowding_distance(self.population.fronts[front_num])
             
             self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
@@ -94,8 +97,18 @@ class Evolution:
             for front in self.population.fronts:
                 self.utils.calculate_crowding_distance(front)
             
-            if geracao % 50:
-                plot_frente_de_pareto(self.population, geracao)
+            print('custo médio',self.population.custo_medio)
+            print('soma média de caminhos',self.population.emissao_media)
+            print('rank médio',self.population.rank_medio)
+            print('melhor rank',self.population.melhor_rank)
+            
+            for i in range(len(self.population.fronts)):
+                print('(',self.population.individuos[i].of[0],'|',self.population.individuos[i].of[1],')',end=',')
+            print('')
+            print('-----------------')
+            
+            # if geracao % 50 == 0:
+            plot_frente_de_pareto(self.population, geracao, self.nome_instancia, geracao)
                 
             self.population.calcula_dados()
             children = self.utils.create_children(self.population)
