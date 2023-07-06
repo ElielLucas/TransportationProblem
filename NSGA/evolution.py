@@ -40,39 +40,32 @@ class Evolution:
         for front in self.population.fronts:
             self.utils.calculate_crowding_distance(front)
         
+        self.population.calcula_dados()
         children = self.utils.create_children(self.population)
         returned_population = None
         for i in tqdm(range(self.num_of_generations)):
             self.population.extend(children)
-            
-            children = self.utils.mutate(children)
                 
-            if i % 20 == 0:
-                random_individuals = []
-                while len(random_individuals) < self.num_of_individuals:
-                    new_indiv = Individuo(montar_solução_random=True)
-                    ok = True
-                    for i in self.population.individuos:
-                        if i.of == new_indiv.of: 
-                            ok = False
-                            break
-                    if ok: random_individuals.append(new_indiv)   
+            # if i % 20 == 0:
+            #     random_individuals = []
+            #     while len(random_individuals) < self.num_of_individuals:
+            #         new_indiv = Individuo(montar_solução_random=True)
+            #         ok = True
+            #         for i in self.population.individuos:
+            #             if i.of == new_indiv.of: 
+            #                 ok = False
+            #                 break
+            #         if ok: random_individuals.append(new_indiv)   
     
-                self.population.extend(random_individuals)
+            #     self.population.extend(random_individuals)
             
-            # aux1 = []
-            # aux2 = []
-            # for i in self.population.individuos:
-            #     aux1.append(i.of[0])
-            #     aux2.append(i.of[1])
-            
-            # seila_df = pd.DataFrame({'of1': aux1,
-            #                          'of2': aux2})
-            # pd.set_option('display.float_format', '{:.8f}'.format)
-            # breakpoint()
-            # print(seila_df[seila_df['of1'].round(8).duplicated(keep=False)])
                 
             self.utils.fast_nondominated_sort(self.population)
+            
+            self.population.calcula_dados()
+            
+            self.population = self.utils.mutate(self.population)
+            
             new_population = Population()
             front_num = 0
             while len(new_population) + len(self.population.fronts[front_num]) <= self.num_of_individuals:
@@ -93,9 +86,10 @@ class Evolution:
             
             for front in self.population.fronts:
                 self.utils.calculate_crowding_distance(front)
-                
-            # breakpoint()
+            
             plot_frente_de_pareto(self.population, i)
+            
+            self.population.calcula_dados()
             children = self.utils.create_children(self.population)
             
 

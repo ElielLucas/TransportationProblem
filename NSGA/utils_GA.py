@@ -131,15 +131,14 @@ class NSGA2Utils:
     def mutate(self, population):
         for e in range(population.__len__()):
             p = float(randint(1, 100))/100.0
-            if p  <= self.probabilidade_mutacao(e):
+            if p  <= self.probabilidade_mutacao(e, population):
                 new_indiv = Individuo(montar_solução_random=True)
-                population[e] = new_indiv
-        print('Mutação realizada')
+                population.individuos[e] = new_indiv
         return population
     
     def probabilidade_mutacao(self, idx, population):
-        if population[idx].rank <= self.rank_medio and self.melhor_rank < self.rank_medio:
-            return 0.5*((float(self.ranks[idx]) - float(self.melhor_rank))/(float(self.rank_medio) - float(self.melhor_rank)))
+        if population.individuos[idx].rank <= population.rank_medio and population.melhor_rank < population.rank_medio:
+            return 0.5*((float(population.individuos[idx].rank) - float(population.melhor_rank))/(float(population.rank_medio) - float(population.melhor_rank)))
         return 0.5
 
      
