@@ -258,20 +258,22 @@ class Evolution:
         global grande_frente_pareto
         custo_frente = np.array([grande_frente_pareto[i].of[0] for i in range(len(grande_frente_pareto))])
         emissao_frente = np.array([grande_frente_pareto[i].of[1] for i in range(len(grande_frente_pareto))])
-        custo = np.array([self.populacao[i].of[0] for i in range(len(self.populacao))])
-        emissao = np.array([self.populacao[i].of[1] for i in range(len(self.populacao))])
-        plt.scatter(emissao,custo,c=np.array(['blue' for i in range(len(self.populacao))]),label='Outras soluções')
+        aux  = [ind for ind in self.populacao if ind not in grande_frente_pareto]
+        custo = np.array([aux[i].of[0] for i in range(len(aux))])
+        emissao = np.array([aux[i].of[1] for i in range(len(aux))])
+        plt.scatter(emissao,custo,c=np.array(['blue' for i in range(len(aux))]),label='Outras soluções')
         plt.scatter(emissao_frente, custo_frente, c=np.array(['red' for i in range(len(grande_frente_pareto))]),label='Frente de pareto')
         plt.xlabel('Emissão de CO2')
         plt.ylabel('Custo do transporte')
         plt.title('ANSGA II - Geração '+geracao)
         plt.legend()
-        caminho = 'Figuras/' + self.nome_instancia + ' - Geração('+str(geracao)+').png'
+        caminho = 'Figuras/' + self.nome_instancia + str(self.iteracao) + ' - Geração('+str(geracao)+').png'
         plt.savefig(caminho)
         plt.close()
 
     def evolve(self):
         global geracao
+        global grande_frente_pareto
         tempo_inicial = time.process_time()
         self.create_initial_population()
         self.frente = []
@@ -284,7 +286,7 @@ class Evolution:
         self.non_dominated_pareto_sort()
         self.calcula_dados()
         self.plot_frente_de_pareto(str(geracao))
-        while time.process_time() - tempo_inicial< 3600:
+        while time.process_time() - tempo_inicial< 600:
             print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
             self.crossover()
             self.non_dominated_pareto_sort()
@@ -304,6 +306,15 @@ class Evolution:
             print('soma média de caminhos',self.emissao_media)
             print('rank médio',self.rank_medio)
             print('melhor rank',self.melhor_rank)
+            
+            # if len(grande_frente_pareto) > 10:
+            #     # Use zip para combinar cada elemento em grande_frente_pareto com seu respectivo crowding_distance
+            #     paired = zip(grande_frente_pareto, self.crowding_distance)
+            #     # Ordene os pares com base nos valores de crowding_distance em ordem decrescente
+            #     sorted_pairs = sorted(paired, key=lambda x: x[1], reverse=True)[0:int(len(grande_frente_pareto)/3)]
+            #     # Extraia os elementos ordenados de grande_frente_pareto a partir dos pares ordenados
+            #     grande_frente_pareto = [item[0] for item in sorted_pairs]
+            
             for i in range(len(grande_frente_pareto)):
                 print('(',grande_frente_pareto[i].of[0],'|',grande_frente_pareto[i].of[1],')',end=',')
             print('')
@@ -311,7 +322,7 @@ class Evolution:
             self.calcula_dados()
             geracao+=1
                 
-            if geracao % 50 == 0:
+            if geracao % 10 == 0:
                 self.plot_frente_de_pareto(str(geracao))
         
         df = pd.DataFrame()
@@ -320,5 +331,5 @@ class Evolution:
         
         df.to_csv('resultados_' + self.nome_instancia + str(self.iteracao) + '_NSGA.csv')
         
-        self.__plot_frente_de_pareto(str(geracao))
+        self.plot_frente_de_pareto(str(geracao))
     
