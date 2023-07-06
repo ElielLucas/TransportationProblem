@@ -45,7 +45,7 @@ class Evolution:
         for i in tqdm(range(self.num_of_generations)):
             self.population.extend(children)
             
-            # self.utils.mutate(children)
+            children = self.utils.mutate(children)
                 
             if i % 20 == 0:
                 random_individuals = []

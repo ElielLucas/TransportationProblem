@@ -127,8 +127,15 @@ class NSGA2Utils:
         self.montar_rotas_faltantes_1(child2, parent2, parent1)
         return child1, child2
 
+    
     def mutate(self, population):
-        return Individuo(montar_solução_random=True)
+        for e in range(population.__len__()):
+            p = float(randint(1, 100))/100.0
+            if p  <= self.probabilidade_mutacao(e):
+                new_indiv = Individuo(montar_solução_random=True)
+                population[e] = new_indiv
+        print('Mutação realizada')
+        return population
 
      
     def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):
