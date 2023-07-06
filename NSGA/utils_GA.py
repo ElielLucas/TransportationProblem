@@ -1,13 +1,13 @@
-from individuo import Individuo, calcular_custo_e_emissao_transporte, find_nearest_neighbor, alocar_demanda
+from individuo import Individuo
 from random import random, choice, randint, randrange, sample, sample
 import numpy as np
-import defines as inp
 from typing import List
 import time
 
 class NSGA2Utils:
-    def __init__(self, num_of_individuals=50):     
+    def __init__(self, num_of_individuals, inp):     
         self.num_of_individuals = num_of_individuals
+        self.inp = inp
     
     def create_children(self, population):
         children = []
@@ -80,9 +80,9 @@ class NSGA2Utils:
 
      
     def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):
-        N = set(inp.N)
-        K = set(inp.K)
-        M = set(inp.M)
+        N = set(self.inp.N)
+        K = set(self.inp.K)
+        M = set(self.inp.M)
         for i, cromo in enumerate(child.cromossomos):
             cromo.set_genes(
                 gene_produtores=parent1.cromossomos[i].gene_produtores,
@@ -103,29 +103,29 @@ class NSGA2Utils:
                 
             self.apagar_rotas_OD(rotas_parent1)
             pontos_disponiveis = list(N | K)
-            for porto in inp.M:
-                if alocacao_destinos[porto - inp.range_port] > 0:
-                    alocacao_a_ser_distribuida = alocacao_destinos[porto - inp.range_port]
+            for porto in self.inp.M:
+                if alocacao_destinos[porto - self.inp.range_port] > 0:
+                    alocacao_a_ser_distribuida = alocacao_destinos[porto - self.inp.range_port]
                     while alocacao_a_ser_distribuida > 0:
                         ponto_mais_proximo = choice(pontos_disponiveis)
                         if ponto_mais_proximo in K:
-                            alocacao_ponto = alocacao_transbordos[ponto_mais_proximo - inp.range_trans]
+                            alocacao_ponto = alocacao_transbordos[ponto_mais_proximo - self.inp.range_trans]
                         elif ponto_mais_proximo in N:
                             alocacao_ponto = alocacao_origens[ponto_mais_proximo]
 
-                        if alocacao_destinos[porto - inp.range_port] <= alocacao_ponto:
-                            new_allocation = alocacao_destinos[porto - inp.range_port]
+                        if alocacao_destinos[porto - self.inp.range_port] <= alocacao_ponto:
+                            new_allocation = alocacao_destinos[porto - self.inp.range_port]
                         else:
-                            excess = alocacao_destinos[porto - inp.range_port] - alocacao_ponto
-                            new_allocation = alocacao_destinos[porto - inp.range_port] - excess
+                            excess = alocacao_destinos[porto - self.inp.range_port] - alocacao_ponto
+                            new_allocation = alocacao_destinos[porto - self.inp.range_port] - excess
                             
                         if ponto_mais_proximo in K:
-                            alocacao_transbordos[ponto_mais_proximo - inp.range_trans] -= new_allocation
+                            alocacao_transbordos[ponto_mais_proximo - self.inp.range_trans] -= new_allocation
                         elif ponto_mais_proximo in N:
                             alocacao_origens[ponto_mais_proximo] -= new_allocation
 
                         alocacao_a_ser_distribuida -= new_allocation
-                        alocacao_destinos[porto - inp.range_port] -= new_allocation
+                        alocacao_destinos[porto - self.inp.range_port] -= new_allocation
 
                         if alocacao_ponto == 0:
                             pontos_disponiveis.remove(ponto_mais_proximo)
@@ -165,10 +165,10 @@ class NSGA2Utils:
 
 
     def apagar_rotas_OD(self, rotas):
-        for node_ini in (inp.N + inp.K):
+        for node_ini in (self.inp.N + self.inp.K):
             if node_ini in rotas:
                 for node_fim in list(rotas[node_ini]):
-                    if node_fim in inp.M:
+                    if node_fim in self.inp.M:
                         del rotas[node_ini][node_fim]
                         
                         

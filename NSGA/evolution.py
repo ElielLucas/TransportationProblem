@@ -1,5 +1,6 @@
 from utils_GA import NSGA2Utils
 from utils_GA import Individuo
+from defines import Defines
 from random import random, choice, randint, randrange, sample, sample
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -15,7 +16,10 @@ menor_custo_frente = 1000000000000.0
 menor_emissao_frente = 1000000000000.0
 taxa_mutacao = 0.5
 class Evolution:
-    def __init__(self):
+    def __init__(self, nome_instancia, iteracao):
+        self.inp = Defines(nome_instancia, iteracao)
+        self.nome_instancia = nome_instancia
+        self.iteracao = iteracao
         self.taxa_cruzamento = 0.8
         self.taxa_mutacao = 0.05
         self.tamanho_populacao = 80
@@ -30,14 +34,14 @@ class Evolution:
         self.melhor_rank = 10000
         self.frente = None
         
-        self.utils = NSGA2Utils(num_of_individuals=self.tamanho_populacao)
+        self.utils = NSGA2Utils(num_of_individuals=self.tamanho_populacao, inp=self.inp)
         
     def create_initial_population(self):
         global geracao
         print('gerando populacao')
         self.populacao = []
         for i in range(self.tamanho_populacao):
-            new_indiv = Individuo(montar_solução_random=True)
+            new_indiv = Individuo(montar_solução_random=True, inp=self.inp)
             self.populacao.append(new_indiv)
             self.insere_na_frente(new_indiv)
             for j in range(len(grande_frente_pareto)):
@@ -149,8 +153,8 @@ class Evolution:
         return pos
     
     def aux_cross(self, parent1, parent2):
-        child1 = Individuo(montar_solução_random=False)
-        child2 = Individuo(montar_solução_random=False)
+        child1 = Individuo(montar_solução_random=False, inp=self.inp)
+        child2 = Individuo(montar_solução_random=False, inp=self.inp)
         self.utils.montar_rotas_faltantes_1(child1, parent1, parent2)
         self.utils.montar_rotas_faltantes_1(child2, parent2, parent1)
         return child1, child2
@@ -164,7 +168,7 @@ class Evolution:
             parent2 = self.tournament(adv = parent1)
             if prob <= self.probabilidade_crossover(parent1,parent2):                
                 if random() <= 0.6:  
-                    indiv_aleatorio = Individuo(montar_solução_random=True)
+                    indiv_aleatorio = Individuo(montar_solução_random=True, inp=self.inp)
                     if choice([0, 1]) == 0:
                         child1, child2 = self.aux_cross(parent1=self.populacao[parent1], parent2=indiv_aleatorio)
                     else:
@@ -193,7 +197,7 @@ class Evolution:
         for e in range(len(self.populacao)):
             p = float(randint(1, 100))/100.0
             if p  <= self.probabilidade_mutacao(e):
-                new_indiv = Individuo(montar_solução_random=True)
+                new_indiv = Individuo(montar_solução_random=True, inp=self.inp)
                 self.populacao[e] = new_indiv
                 self.insere_na_frente(new_indiv)
         print('Mutação realizada')
@@ -262,7 +266,7 @@ class Evolution:
         plt.ylabel('Custo do transporte')
         plt.title('ANSGA II - Geração '+geracao)
         plt.legend()
-        caminho = 'Figuras/' + 'Geração('+str(geracao)+').png'
+        caminho = 'Figuras/' + self.nome_instancia + ' - Geração('+str(geracao)+').png'
         plt.savefig(caminho)
         plt.close()
 
@@ -280,7 +284,7 @@ class Evolution:
         self.non_dominated_pareto_sort()
         self.calcula_dados()
         self.plot_frente_de_pareto(str(geracao))
-        while time.process_time() - tempo_inicial< 100000:
+        while time.process_time() - tempo_inicial< 3600:
             print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
             self.crossover()
             self.non_dominated_pareto_sort()
@@ -307,10 +311,14 @@ class Evolution:
             self.calcula_dados()
             geracao+=1
                 
-            if len(grande_frente_pareto) > 1:
+            if geracao % 50 == 0:
                 self.plot_frente_de_pareto(str(geracao))
-        # self.__plot_frente_de_pareto(str(geracao))
+        
+        df = pd.DataFrame()
+        for i in range(len(grande_frente_pareto)):
+            df = df.append({'Custo Transporte': grande_frente_pareto[i].of[0], 'Emissão Transporte': grande_frente_pareto[i].of[1]})
+        
+        df.to_csv('resultados_' + self.nome_instancia + str(self.iteracao) + '_NSGA.csv')
+        
+        self.__plot_frente_de_pareto(str(geracao))
     
-    
-otm = Evolution()
-result_omtz = otm.evolve()

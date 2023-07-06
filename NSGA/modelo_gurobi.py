@@ -73,16 +73,14 @@ class Gurobi:
         # Verificar o status da otimização
         status = self.m.status
         if status == gp.GRB.OPTIMAL:
-            with open('resultado_gurobi.txt', 'w') as f:
-                # Escreva os cabeçalhos das colunas
-                f.write('Obj1\tObj2\n')
-                # Escreva os resultados
-                f.write(f'{self.f1.getValue()}\t{self.f2.getValue()}\n')
-            # solution = m.getAttr('x', m.getVars())
+            return self.f1.getValue(), self.f2.getValue()
         elif status == gp.GRB.TIME_LIMIT:
             print('Limite de tempo atingido, a solução não foi encontrada dentro do tempo definido.')
+            return 0, 0
         else:
             print('A otimização foi interrompida devido a um erro ou outro motivo.')
+            return 0, 0
+
             
             
     def criar_instancia(self, nome_instancia, iteracao, qtd_origens, qtd_trans, qtd_port, qtd_cli):

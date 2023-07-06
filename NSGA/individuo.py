@@ -1,70 +1,11 @@
 import numpy as np
 import random
-import defines as inp
 from typing import List, Dict, DefaultDict, Set
 from collections import defaultdict
 
-def find_nearest_neighbor(ponto_referencia, possiveis_destinos, pontos_sem_capacidade):
-    pontos_sem_capacidade = set(pontos_sem_capacidade)
-    vizinho_mais_proximo = float('inf')
-    indice_vizinho_mais_proximo = None
-    for i, distancia in enumerate(inp.dist_matrix[ponto_referencia]):
-        if i in possiveis_destinos and i not in pontos_sem_capacidade and distancia < vizinho_mais_proximo:
-            vizinho_mais_proximo = distancia
-            indice_vizinho_mais_proximo = i
-
-    return indice_vizinho_mais_proximo
-    
-
-def calcular_custo_e_emissao_transporte(gene):
-    N = set(inp.N)
-    K = set(inp.K)
-    M = set(inp.M)
-
-    custo_transporte = 0
-    emissao_transporte = 0
-    tempo_transporte = 0
-    for node_ini, aresta in gene.lista_adjacencia.items():
-        for node_fim, qtd_transportada in aresta.items():
-            if (node_ini in N and node_fim in K) or (node_ini in N and node_fim in M):
-                custo_modal = inp.cr
-                emissao_modal = inp.er
-            else:
-                custo_modal = inp.cf
-                emissao_modal = inp.ef
-            custo_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * custo_modal
-            emissao_transporte += qtd_transportada * inp.tempo_matrix[node_ini][node_fim] * emissao_modal
-            tempo_transporte += qtd_transportada * inp.tempo_matrix[node_ini][node_fim]
-    return [custo_transporte, emissao_transporte]
-
-
-def alocar_demanda(provider, target, range_point, provider_allocation,
-                   target_point_allocation, target_point_capacity, 
-                   total_demanda, cromossomo):
-    # Pre-calcule valores comumente referenciados
-    range_provider = 0 if len(range_point) == 1 else range_point[0]
-    range_target = range_point[0] if len(range_point) == 1 else range_point[1]
-
-    provider_index = provider - range_provider
-    target_index = target - range_target
-
-    # Determine a nova alocação baseada na capacidade e na alocação do fornecedor
-    new_allocation = min(provider_allocation[provider_index], target_point_capacity[target_index])
-
-    # Atualize a alocação e capacidade
-    provider_allocation[provider_index] -= new_allocation
-    target_point_allocation[target_index] += new_allocation
-    target_point_capacity[target_index] -= new_allocation
-    total_demanda -= new_allocation
-
-    # Adicione a borda ao cromossomo
-    cromossomo.add_edge(provider, target, new_allocation)
-
-    return target_point_allocation, total_demanda
-    
     
 class Cromossomo:
-    def __init__(self) -> None:
+    def __init__(self, inp) -> None:
         self.gene_produtores = np.zeros_like(inp.N)
         self.gene_transbordos = np.zeros_like(inp.M)
         self.gene_portos = np.zeros_like(inp.K)
@@ -80,7 +21,8 @@ class Cromossomo:
 
      
 class  Individuo:
-    def __init__(self, montar_solução_random: bool) -> None:
+    def __init__(self, montar_solução_random: bool, inp) -> None:
+        self.inp = inp
         self.produtores = inp.N
         self.portos = inp.M
         self.ferrovias = inp.K
@@ -99,7 +41,7 @@ class  Individuo:
         self.of = []
         self.fit = []
         for _ in range(len(self.demandas_clientes)):
-            self.cromossomos.append(Cromossomo())
+            self.cromossomos.append(Cromossomo(inp))
         
         if montar_solução_random:
             self.montar_solução_random() 
@@ -108,6 +50,64 @@ class  Individuo:
     
     def __lt__(self,other):
         return (self.of[0] < other.of[0] and self.of[1] <= other.of[1]) or (self.of[0] <= other.of[0] and self.of[1] < other.of[1])
+
+    def find_nearest_neighbor(self, ponto_referencia, possiveis_destinos, pontos_sem_capacidade):
+        pontos_sem_capacidade = set(pontos_sem_capacidade)
+        vizinho_mais_proximo = float('inf')
+        indice_vizinho_mais_proximo = None
+        for i, distancia in enumerate(self.inp.dist_matrix[ponto_referencia]):
+            if i in possiveis_destinos and i not in pontos_sem_capacidade and distancia < vizinho_mais_proximo:
+                vizinho_mais_proximo = distancia
+                indice_vizinho_mais_proximo = i
+
+        return indice_vizinho_mais_proximo
+        
+
+    def calcular_custo_e_emissao_transporte(self, gene):
+        N = set(self.inp.N)
+        K = set(self.inp.K)
+        M = set(self.inp.M)
+
+        custo_transporte = 0
+        emissao_transporte = 0
+        tempo_transporte = 0
+        for node_ini, aresta in gene.lista_adjacencia.items():
+            for node_fim, qtd_transportada in aresta.items():
+                if (node_ini in N and node_fim in K) or (node_ini in N and node_fim in M):
+                    custo_modal = self.inp.cr
+                    emissao_modal = self.inp.er
+                else:
+                    custo_modal = self.inp.cf
+                    emissao_modal = self.inp.ef
+                custo_transporte += qtd_transportada * self.inp.dist_matrix[node_ini][node_fim] * custo_modal
+                emissao_transporte += qtd_transportada * self.inp.tempo_matrix[node_ini][node_fim] * emissao_modal
+                tempo_transporte += qtd_transportada * self.inp.tempo_matrix[node_ini][node_fim]
+        return [custo_transporte, emissao_transporte]
+
+
+    def alocar_demanda(self, provider, target, range_point, provider_allocation,
+                       target_point_allocation, target_point_capacity, 
+                       total_demanda, cromossomo):
+        # Pre-calcule valores comumente referenciados
+        range_provider = 0 if len(range_point) == 1 else range_point[0]
+        range_target = range_point[0] if len(range_point) == 1 else range_point[1]
+
+        provider_index = provider - range_provider
+        target_index = target - range_target
+
+        # Determine a nova alocação baseada na capacidade e na alocação do fornecedor
+        new_allocation = min(provider_allocation[provider_index], target_point_capacity[target_index])
+
+        # Atualize a alocação e capacidade
+        provider_allocation[provider_index] -= new_allocation
+        target_point_allocation[target_index] += new_allocation
+        target_point_capacity[target_index] -= new_allocation
+        total_demanda -= new_allocation
+
+        # Adicione a borda ao cromossomo
+        cromossomo.add_edge(provider, target, new_allocation)
+
+        return target_point_allocation, total_demanda
 
     def montar_solução_random(self):
         pontos_sem_capacidade: Set[int] = set()
@@ -147,15 +147,15 @@ class  Individuo:
         for produtor in origens:
             alocacao_a_ser_distribuida = aloc_prod[produtor]
             while alocacao_a_ser_distribuida > 0:
-                ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=produtor, 
+                ponto_mais_proximo = self.find_nearest_neighbor(ponto_referencia=produtor, 
                                                         possiveis_destinos=intermediarios + destinos, 
                                                         pontos_sem_capacidade=pontos_sem_capacidade)
                 if ponto_mais_proximo in intermediarios:
-                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_intermediarios[ponto_mais_proximo - inp.range_trans])
+                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_intermediarios[ponto_mais_proximo - self.inp.range_trans])
                     if demanda_alocar > 0:
-                        gene_intermediario, alocacao_a_ser_distribuida = alocar_demanda(provider=produtor, 
+                        gene_intermediario, alocacao_a_ser_distribuida = self.alocar_demanda(provider=produtor, 
                                                                                         target=ponto_mais_proximo, 
-                                                                                        range_point=[inp.range_trans],
+                                                                                        range_point=[self.inp.range_trans],
                                                                                         provider_allocation=aloc_prod, 
                                                                                         target_point_allocation=gene_intermediario, 
                                                                                         target_point_capacity=capacidade_intermediarios, 
@@ -164,11 +164,11 @@ class  Individuo:
                     else:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
                 else:
-                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_destino[ponto_mais_proximo - inp.range_port])
+                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_destino[ponto_mais_proximo - self.inp.range_port])
                     if demanda_alocar > 0:
-                        gene_destino, alocacao_a_ser_distribuida = alocar_demanda(provider=produtor, 
+                        gene_destino, alocacao_a_ser_distribuida = self.alocar_demanda(provider=produtor, 
                                                                                   target=ponto_mais_proximo,  
-                                                                                  range_point=[inp.range_port],
+                                                                                  range_point=[self.inp.range_port],
                                                                                   provider_allocation=aloc_prod, 
                                                                                   target_point_allocation=gene_destino, 
                                                                                   target_point_capacity=capacidade_destino, 
@@ -184,16 +184,16 @@ class  Individuo:
         
         aloc_trans = gene_intermediario.copy()
         for transbordo in intermediarios:
-            if aloc_trans[transbordo - inp.range_trans] > 0:
-                alocacao_a_ser_distribuida = aloc_trans[transbordo - inp.range_trans]
+            if aloc_trans[transbordo - self.inp.range_trans] > 0:
+                alocacao_a_ser_distribuida = aloc_trans[transbordo - self.inp.range_trans]
                 while alocacao_a_ser_distribuida > 0:
-                    ponto_mais_proximo = find_nearest_neighbor(ponto_referencia=transbordo, possiveis_destinos=destinos, 
+                    ponto_mais_proximo = self.find_nearest_neighbor(ponto_referencia=transbordo, possiveis_destinos=destinos, 
                                                                pontos_sem_capacidade=pontos_sem_capacidade)
-                    gene_destino, alocacao_a_ser_distribuida = alocar_demanda(provider=transbordo, target=ponto_mais_proximo, range_point=[inp.range_trans, inp.range_port],
+                    gene_destino, alocacao_a_ser_distribuida = self.alocar_demanda(provider=transbordo, target=ponto_mais_proximo, range_point=[self.inp.range_trans, self.inp.range_port],
                                                                               provider_allocation=aloc_trans, target_point_allocation=gene_destino, 
                                                                               target_point_capacity=capacidade_destino, total_demanda=alocacao_a_ser_distribuida,
                                                                               cromossomo=cromossomo)
-                    if capacidade_destino[ponto_mais_proximo - inp.range_port] == 0:
+                    if capacidade_destino[ponto_mais_proximo - self.inp.range_port] == 0:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
     
     
@@ -216,7 +216,7 @@ class  Individuo:
         emissao_total = 0
         tempo_total = 0
         for i in range(len(self.demandas_clientes)):
-            custo, emissao = calcular_custo_e_emissao_transporte(gene=self.cromossomos[i])
+            custo, emissao = self.calcular_custo_e_emissao_transporte(gene=self.cromossomos[i])
             custo_total += custo
             emissao_total += emissao
             # tempo_total += tempo
