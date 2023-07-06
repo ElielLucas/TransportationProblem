@@ -2,9 +2,11 @@ class Population:
     def __init__(self):
         self.individuos = []
         self.fronts = []
-        self.rank_medio = 0
-        self.melhor_rank = 0
-
+        self.rank_medio = 0.0
+        self.melhor_rank = 100000
+        self.custo_medio = 0.0
+        self.emissao_media = 0.0
+        
     def __len__(self):
         return len(self.individuos)
 
@@ -22,3 +24,16 @@ class Population:
 
     def append(self, new_individual):
         self.individuos.append(new_individual)
+        
+    def calcula_dados(self):
+        self.custo_medio = 0.0
+        self.emissao_media = 0.0
+        self.rank_medio = 0.0
+        for i in range(self.__len__()):
+            self.custo_medio += float(self.individuos[i].of[0])
+            self.emissao_media += float(self.individuos[i].of[1])
+            self.rank_medio += self.individuos[i].rank
+            self.melhor_rank = min(self.melhor_rank, self.individuos[i])
+        self.custo_medio/=float(self.__len__())
+        self.emissao_media/=float(self.__len__())
+        self.rank_medio/=float(self.__len__())
