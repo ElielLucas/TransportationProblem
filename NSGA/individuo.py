@@ -23,6 +23,7 @@ def calcular_custo_e_emissao_transporte(gene):
 
     custo_transporte = 0
     emissao_transporte = 0
+    tempo_transporte = 0
     for node_ini, aresta in gene.lista_adjacencia.items():
         for node_fim, qtd_transportada in aresta.items():
             if (node_ini in N and node_fim in K) or (node_ini in N and node_fim in M):
@@ -32,7 +33,8 @@ def calcular_custo_e_emissao_transporte(gene):
                 custo_modal = inp.cf
                 emissao_modal = inp.ef
             custo_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * custo_modal
-            emissao_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * emissao_modal
+            emissao_transporte += qtd_transportada * inp.tempo_matrix[node_ini][node_fim] * emissao_modal
+            tempo_transporte += qtd_transportada * inp.tempo_matrix[node_ini][node_fim]
     return [custo_transporte, emissao_transporte]
 
 
@@ -104,6 +106,8 @@ class  Individuo:
             self.calculate_objectives()
 
     
+    def __lt__(self,other):
+        return (self.of[0] < other.of[0] and self.of[1] <= other.of[1]) or (self.of[0] <= other.of[0] and self.of[1] < other.of[1])
 
     def montar_solução_random(self):
         pontos_sem_capacidade: Set[int] = set()
@@ -210,10 +214,13 @@ class  Individuo:
     def objective_function(self):
         custo_total = 0
         emissao_total = 0
+        tempo_total = 0
         for i in range(len(self.demandas_clientes)):
             custo, emissao = calcular_custo_e_emissao_transporte(gene=self.cromossomos[i])
             custo_total += custo
             emissao_total += emissao
+            # tempo_total += tempo
+            # lucro += (cliente_deve - custo_total) / emissao
             
         return [custo_total, emissao_total]
 

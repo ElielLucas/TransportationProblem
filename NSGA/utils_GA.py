@@ -1,23 +1,13 @@
 from individuo import Individuo, calcular_custo_e_emissao_transporte, find_nearest_neighbor, alocar_demanda
 from random import random, choice, randint, randrange, sample, sample
-from population import Population
 import numpy as np
 import defines as inp
 from typing import List
 import time
 
 class NSGA2Utils:
-    def __init__(self, num_of_individuals=50, tournament_prob=0.9, mutation_param=5):
-        
+    def __init__(self, num_of_individuals=50):     
         self.num_of_individuals = num_of_individuals
-        self.tournament_prob = tournament_prob
-        self.mutation_param = mutation_param
-        
-    def create_initial_population(self):
-        population = Population()
-        population.individuos = [Individuo(montar_solução_random=True) for _ in range(self.num_of_individuals)]
-        return population
-    
     
     def create_children(self, population):
         children = []
@@ -48,62 +38,6 @@ class NSGA2Utils:
 
         return children
     
-    def tournament(self, population):
-        # Seleciona dois indivíduos aleatórios
-        ind1 = randint(0, len(population)-1)
-        ind2 = randint(0, len(population)-1)
-        if population.individuos[ind1].rank < population.individuos[ind2].rank:
-            return population.individuos[ind1]
-        elif population.individuos[ind1].rank > population.individuos[ind2].rank:
-            return population.individuos[ind2]
-        else:
-            if population.individuos[ind1].crowding_distance > population.individuos[ind2].crowding_distance:
-                return population.individuos[ind1]
-            else:
-                return population.individuos[ind2]
-
-
-    def crowding_operator(self, individual, other_individual):
-        if (individual.rank < other_individual.rank) or ((individual.rank == other_individual.rank) and (
-                        individual.crowding_distance > other_individual.crowding_distance)):
-            return 1
-        else:
-            return -1
-        
-
-    def choose_with_prob(self, prob):
-        if random() <= prob:
-            return True
-        return False
-    
-    def fast_nondominated_sort(self, population):
-        population.fronts = [[]]
-        for individual in population:
-            individual.domination_count = 0
-            individual.dominated_solutions = []
-            for other_individual in population:
-                if individual.dominates(other_individual):
-                    individual.dominated_solutions.append(other_individual)
-                elif other_individual.dominates(individual):
-                    individual.domination_count += 1
-            if individual.domination_count == 0:
-                individual.rank = 0
-                population.fronts[0].append(individual)
-        
-        i = 0
-        while len(population.fronts[i]) > 0:
-            temp = []
-            for individual in population.fronts[i]:
-                for other_individual in individual.dominated_solutions:
-                    other_individual.domination_count -= 1
-                    if other_individual.domination_count == 0:
-                        other_individual.rank = i + 1
-                        temp.append(other_individual)
-            
-            i = i + 1
-            population.fronts.append(temp)
-        del population.fronts[i:]
-
 
     def calculate_crowding_distance(self, front):
         if len(front) > 0:
@@ -120,12 +54,26 @@ class NSGA2Utils:
                 for i in range(1, solutions_num - 1):
                     front[i].crowding_distance += (front[i + 1].of[m] - front[i - 1].of[m]) / scale
 
+    
     def crossover(self, parent1, parent2):
+        p = float(random.randint(1,100))/100.0
+        qtd = int(len(self.populacao)/2)
+        prole = []
+        
+        while qtd>0:
+            parent1 = self.torneio()
+            parent2 = self.torneio(adv = parent1)
+            if p <= self.__probabilidade_crossover(parent1,parent2):
+                prole += self.populacao[parent1]+self.populacao[parent2]
+            qtd-=1
+        self.populacao.individuos += prole
+        
         child1 = Individuo(montar_solução_random=False)
         child2 = Individuo(montar_solução_random=False)
         self.montar_rotas_faltantes_1(child1, parent1, parent2)
         self.montar_rotas_faltantes_1(child2, parent2, parent1)
         return child1, child2
+
 
     def mutate(self, population):
         return Individuo(montar_solução_random=True)

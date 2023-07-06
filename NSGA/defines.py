@@ -1,5 +1,6 @@
 import numpy as np
 from utils import gen_points
+import random
 # N = [0, 1, 2]
 # K = [3, 4]
 # M = [5, 6, 7]
@@ -28,7 +29,6 @@ from utils import gen_points
 # ])
 er = 0.8
 ef = 0.2
-
 
 with open('input_transport_problem.txt', 'r') as arquivo:
     linhas = arquivo.readlines()
@@ -76,7 +76,26 @@ range_trans = len(N)
 range_port = len(N) + len(K)
 
 quantidade_nodes = len(N) + len(K) + len(M)
+tempo_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
 
+with open('input_tempo.txt', 'r') as arquivo:
+    linhas = arquivo.readlines()
+    aux = 0
+    for it, i in enumerate(range(0, len(linhas))):
+        if it in N:
+            pontos = linhas[i].split()
+            for it2, tempo in enumerate(pontos):
+                tempo_matrix[it][K[it2]] = tempo
+        elif it in K:
+            pontos = linhas[i].split()
+            for it2, tempo in enumerate(pontos):
+                tempo_matrix[it][M[it2]] = tempo
+        else:
+            pontos = linhas[i].split()
+            for it2, tempo in enumerate(pontos):
+                tempo_matrix[aux][M[it2]] = tempo
+            aux += 1
+    
 dist_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
 for i in N:
     for k in K:
