@@ -46,7 +46,7 @@ class Evolution:
         
         geracao = 0
         tempo_inicial = time.process_time()
-        while time.process_time() - tempo_inicial< 600:
+        while tqdm(time.process_time() - tempo_inicial< 600):
             self.population.extend(children)
             
             self.utils.fast_nondominated_sort(self.population)
