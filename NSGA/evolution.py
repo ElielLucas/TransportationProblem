@@ -7,17 +7,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-taxa_mutacao = 0.5
-
 def plot_frente_de_pareto(populacao, geracao):
     custo_frente = np.array([populacao.fronts[0][i].of[0] for i in range(len(populacao.fronts[0]))])
     emissao_frente = np.array([populacao.fronts[0][i].of[1] for i in range(len(populacao.fronts[0]))])
     custo = np.array([populacao.fronts[i][j].of[0] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
     emissao = np.array([populacao.fronts[i][j].of[1] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
-    plt.scatter(emissao,custo,c=np.array(['blue' for i in range(len(custo))]),label='Outras soluções')
-    plt.scatter(emissao_frente, custo_frente, c=np.array(['red' for i in range(len(populacao.fronts[0]))]),label='Frente de pareto')
+    plt.scatter(emissao,custo,c=np.array(['#a6a6a6' for i in range(len(custo))]),label='Outras soluções')
+    plt.scatter(emissao_frente, custo_frente, c=np.array(['#405a51' for i in range(len(populacao.fronts[0]))]),label='Frente de pareto')
     plt.xlabel('Emissão de CO2')
-    plt.ylabel('Custo do transporte')
+    plt.ylabel('Custo do Transporte')
     plt.title('ANSGA II - Geração '+ str(geracao))
     plt.legend()
     caminho = 'Figuras/' + ' - Geração('+str(geracao)+').png'
@@ -47,7 +45,7 @@ class Evolution:
             self.population.extend(children)
             
             self.utils.fast_nondominated_sort(self.population)
-                
+            
             self.population.calcula_dados()
             
             self.population = self.utils.mutate(self.population)

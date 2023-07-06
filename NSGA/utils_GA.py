@@ -23,25 +23,31 @@ class NSGA2Utils:
         prob = float(randint(1,100))/100.0
         qtd = int(population.__len__())
         prole = []
+        of_children = []
         population.calculate_of_population()
-        while qtd>0:
+        while qtd > 0:
             parent1 = self.tournament(population=population)
             parent2 = self.tournament(adv = parent1, population=population)
-            # if prob <= self.probabilidade_crossover(parent1, parent2, population):                
-            if random() <= 0.6:  
-                indiv_aleatorio = Individuo(montar_solução_random=True)
-                if choice([0, 1]) == 0:
-                    child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=indiv_aleatorio)
-                else:
-                    child1, child2 = self.crossover(parent1=population.individuos[parent2], parent2=indiv_aleatorio)
-            else:
+            if prob <= self.probabilidade_crossover(parent1, parent2, population):                
+                # if random() <= 0.6:  
+                #     indiv_aleatorio = Individuo(montar_solução_random=True)
+                #     if choice([0, 1]) == 0:
+                #         child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=indiv_aleatorio)
+                #     else:
+                #         child1, child2 = self.crossover(parent1=population.individuos[parent2], parent2=indiv_aleatorio)
+                # else:
                 child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=population.individuos[parent2])
 
-            child1.calculate_objectives()
-            child2.calculate_objectives()
-            prole.append(child1)
-            prole.append(child2)
-            qtd-=1
+                child1.calculate_objectives()
+                child2.calculate_objectives()
+                
+                if (child1.of not in population.of_population and child1.of not in of_children):
+                    prole.append(child1)
+                    of_children.append(child1.of)
+                if (child2.of not in population.of_population and child2.of not in of_children):
+                    prole.append(child2)
+                    of_children.append(child2.of)
+                qtd-=1
 
         return prole
     
