@@ -4,7 +4,7 @@ import random
 
 er = 0.8
 ef = 0.2
-with open('instancias_pequenas1.txt', 'r') as arquivo:
+with open('instancias_pequenas0.txt', 'r') as arquivo:
     linhas = arquivo.readlines()
     cr = float(linhas[0].rstrip('\n'))
     cf = float(linhas[1].rstrip('\n'))
@@ -52,7 +52,7 @@ range_port = len(N) + len(K)
 quantidade_nodes = len(N) + len(K) + len(M)
 tempo_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
 
-with open('instancias_pequenas1_tempo.txt', 'r') as arquivo:
+with open('instancias_pequenas0_tempo.txt', 'r') as arquivo:
     linhas = arquivo.readlines()
     aux = 0
     for it, i in enumerate(range(0, len(linhas))):
