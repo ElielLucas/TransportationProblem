@@ -1,6 +1,11 @@
 
-valor1 = 1.6006213e+07
-valor2 = 1.6447385e+07
+
+import pandas as pd
+
+
+df = pd.read_csv('resultados_teste9.csv')
+valor1 = df['Inst.Pequena - 3'].mean()
+valor2 = 2.95923033e+08
 
 
 gap = ((valor1 - valor2)/valor1) * 100

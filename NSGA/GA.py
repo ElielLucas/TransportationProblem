@@ -61,7 +61,7 @@ def algoritmo_genetico():
 list_resul = []
 for i in range(10):
     list_resul.append(algoritmo_genetico())
-    df = pd.DataFrame({'Inst.Grande - 11': list_resul})
-    df.to_csv('resultados_teste.csv')
+    df = pd.DataFrame({'Inst.Pequena - 3': list_resul})
+    df.to_csv('resultados_teste9.csv')
     
 breakpoint()
