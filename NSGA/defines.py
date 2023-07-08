@@ -18,9 +18,9 @@ class Defines:
             self.K = [int(valor) for valor in self.K if valor != '\n']
             self.M = linhas[4].split()
             self.M = [int(valor) for valor in self.M if valor != '\n']
-            
             self.demandas = linhas[5].split()
             self.demandas = [int(valor) for valor in self.demandas if valor != '\n']
+            # breakpoint()
             self.demandas_clientes = [sum(self.demandas)]
             
             self.ofertas = linhas[6].split()
