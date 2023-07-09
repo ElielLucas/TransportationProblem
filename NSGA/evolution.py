@@ -15,7 +15,7 @@ def plot_frente_de_pareto(populacao, geracao, nome_instancia, iteracao):
     custo = np.array([populacao.fronts[i][j].of[0] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
     emissao = np.array([populacao.fronts[i][j].of[1] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
     plt.scatter(emissao,custo,c=np.array(['#a6a6a6' for i in range(len(custo))]),label='Outras soluções')
-    plt.scatter(emissao_frente, custo_frente, c=np.array(['#405a51' for i in range(len(populacao.fronts[0]))]),label='Frente de pareto')
+    plt.scatter(emissao_frente, custo_frente, c=np.array(['#405a51' for i in range(len(custo_frente))]),label='Frente de pareto')
     plt.xlabel('Emissão de CO2')
     plt.ylabel('Custo do Transporte')
     plt.title('ANSGA II - Geração '+ str(geracao))
@@ -30,7 +30,7 @@ class Evolution:
         
         self.inp = Defines(nome_instancia, iteracao)
         self.nome_instancia = nome_instancia
-        self.num_of_individuals = 75
+        self.num_of_individuals = 80
         self.utils = NSGA2Utils(self.num_of_individuals, self.inp)
         self.population = None
 
@@ -45,7 +45,7 @@ class Evolution:
         returned_population = None
         geracao = 0
         tempo_inicial = time.process_time()
-        while time.process_time() - tempo_inicial< 600:
+        while time.process_time() - tempo_inicial< 1200:
             print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
 
             self.population.extend(children)
@@ -70,6 +70,7 @@ class Evolution:
             
                 
             self.utils.fast_nondominated_sort(self.population)
+            self.population.calcula_dados()
             
             
             new_population = Population()
@@ -83,16 +84,17 @@ class Evolution:
                 #     break
             
             # breakpoint()
-            self.utils.calculate_crowding_distance(self.population.fronts[front_num])
+            # self.utils.calculate_crowding_distance(self.population.fronts[front_num])
             
-            self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
+            # self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
             
-            new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals - new_population.__len__()])
+            # new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals - new_population.__len__()])
             
             returned_population = self.population
             self.population = new_population
             
             self.utils.fast_nondominated_sort(self.population)
+            self.population.calcula_dados()
             
             for front in self.population.fronts:
                 self.utils.calculate_crowding_distance(front)
@@ -102,15 +104,15 @@ class Evolution:
             print('rank médio',self.population.rank_medio)
             print('melhor rank',self.population.melhor_rank)
             
-            for i in range(len(self.population.fronts)):
-                print('(',self.population.individuos[i].of[0],'|',self.population.individuos[i].of[1],')',end=',')
+            for i in self.population.fronts[0]:
+                print('(',i.of[0],'|',i.of[1],')',end=',')
             print('')
             print('-----------------')
             
             # if geracao % 50 == 0:
             plot_frente_de_pareto(self.population, geracao, self.nome_instancia, geracao)
-                
-            self.population.calcula_dados()
+
+            # self.population.calcula_dados()
             children = self.utils.create_children(self.population)
             geracao += 1
             

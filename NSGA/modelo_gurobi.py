@@ -88,7 +88,7 @@ class Gurobi:
         self.trans = random.randint(1, qtd_trans)
         self.port = random.randint(1, qtd_port)
         self.cli = random.randint(1, qtd_cli)
-        while self.orig * self.trans * self.port * self.cli > 10000000:
+        while (self.orig * self.trans * self.port * self.cli > 1000000) and self.trans > self.orig and self.trans > self.port and self.port > self.orig:
             self.orig = random.randint(1, qtd_origens)
             self.trans = random.randint(1, qtd_trans)
             self.port = random.randint(1, qtd_port)

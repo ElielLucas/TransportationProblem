@@ -60,15 +60,22 @@ class NSGA2Utils:
                 other = randint(0,lim-1)
             if population.individuos[other] < population.individuos[ret]:
                 ret = other
+            elif population.individuos[ret] < population.individuos[other]:
+                ret = ret
+            else:
+                if population.individuos[other].crowding_distance < population.individuos[ret].crowding_distance:
+                    ret = other
+                
         return ret
         
     
     def probabilidade_crossover(self, idx1, idx2, population):
         idx = idx1
-        if(population.individuos[idx2].rank < population.individuos[idx1].rank):
-            idx = idx2
-        if(population.individuos[idx].rank > population.rank_medio) and population.melhor_rank < population.rank_medio:
-            return (population.rank_medio - population.melhor_rank)/(population.rank_medio - population.melhor_rank)
+        if(population.individuos[idx].rank > population.rank_medio):
+            return (population.rank_medio - population.melhor_rank)/(population.individuos[idx].rank - population.melhor_rank)
+        
+        if(population.individuos[idx].rank <= population.rank_medio):
+            return 1.0
         return 1.0
 
 
@@ -143,15 +150,16 @@ class NSGA2Utils:
             if prob  <= self.probabilidade_mutacao(e, population):
                 # breakpoint()
                 new_indiv = Individuo(montar_solução_random=True, inp = self.inp)
-                population.individuos[e] = new_indiv
+                if new_indiv < population.individuos[e]:
+                    population.individuos[e] = new_indiv
         return population
     
     def probabilidade_mutacao(self, idx, population):
         if population.individuos[idx].rank <= population.rank_medio and population.melhor_rank < population.rank_medio:
             return 0.5*((float(population.individuos[idx].rank) - float(population.melhor_rank))/(float(population.rank_medio) - float(population.melhor_rank)))
+        
         return 0.5
-
-     
+        
     def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):
         N = set(self.inp.N)
         K = set(self.inp.K)

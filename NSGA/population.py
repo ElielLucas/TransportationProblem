@@ -33,7 +33,6 @@ class Population:
             self.custo_medio += float(self.individuos[i].of[0])
             self.emissao_media += float(self.individuos[i].of[1])
             self.rank_medio += self.individuos[i].rank
-            self.melhor_rank = min(self.melhor_rank, self.individuos[i].rank)
         
         self.custo_medio /= float(self.__len__())
         self.emissao_media /= float(self.__len__())
