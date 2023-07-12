@@ -20,7 +20,7 @@ def plot_frente_de_pareto(populacao, geracao, nome_instancia, iteracao):
     plt.ylabel('Custo do Transporte')
     plt.title('ANSGA II - Geração '+ str(geracao))
     plt.legend()
-    caminho = 'Figuras/' + nome_instancia + ' - Geração('+str(geracao)+').png'
+    caminho = 'Figuras/' + nome_instancia + str(iteracao) + ' - Geração('+str(geracao)+').png'
     plt.savefig(caminho)
     plt.close()
         

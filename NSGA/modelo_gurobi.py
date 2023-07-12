@@ -198,7 +198,7 @@ class Gurobi:
         for k in self.K:
             for j in self.M:
                 self.dist_trans_porto[k, j] = gen_points.distance(points_trans[k - self.orig].x, points_trans[k - self.orig].y, points_portos[j - self.range_port].x, points_portos[j - self.range_port].y)
-                tempo = self.tempo_matrix[j, k] = self.dist_trans_porto[k, j] / random.uniform(70, 150)
+                tempo = self.tempo_matrix[j, k] = self.dist_trans_porto[k, j] / random.uniform(20, random.choice([30, 40]))
                 self.tempo_matrix[k, j] = tempo
                 texto_tempo += str(tempo) + ' '
             texto_tempo += '\n'
