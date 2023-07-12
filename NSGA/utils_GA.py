@@ -1,19 +1,19 @@
 from individuo import Individuo
 from random import random, choice, randint, randrange, sample, sample
 from population import Population
-from defines import Defines
+# from defines import Defines
+import input as inp
 import numpy as np
 from typing import List
 import time
 
 class NSGA2Utils:
     def __init__(self, num_of_individuals, inp): 
-        self.inp = inp
         self.num_of_individuals = num_of_individuals
         
     def create_initial_population(self):
         population = Population()
-        population.individuos = [Individuo(montar_solução_random=True, inp=self.inp) for _ in range(self.num_of_individuals)]
+        population.individuos = [Individuo(montar_solução_random=True) for _ in range(self.num_of_individuals)]
         return population
     
     
@@ -28,7 +28,7 @@ class NSGA2Utils:
             parent2 = self.tournament(adv = parent1, population=population)
             if prob <= self.probabilidade_crossover(parent1, parent2, population):                
                 if random() <= 0.6:  
-                    indiv_aleatorio = Individuo(montar_solução_random=True, inp = self.inp)
+                    indiv_aleatorio = Individuo(montar_solução_random=True)
                     if choice([0, 1]) == 0:
                         child1, child2 = self.crossover(parent1=population.individuos[parent1], parent2=indiv_aleatorio)
                     else:
@@ -137,8 +137,8 @@ class NSGA2Utils:
                     front[i].crowding_distance += (front[i + 1].of[m] - front[i - 1].of[m]) / scale
 
     def crossover(self, parent1, parent2):
-        child1 = Individuo(montar_solução_random=False, inp=self.inp)
-        child2 = Individuo(montar_solução_random=False, inp=self.inp)
+        child1 = Individuo(montar_solução_random=False)
+        child2 = Individuo(montar_solução_random=False)
         self.montar_rotas_faltantes_1(child1, parent1, parent2)
         self.montar_rotas_faltantes_1(child2, parent2, parent1)
         return child1, child2
@@ -149,9 +149,12 @@ class NSGA2Utils:
             prob = float(randint(1, 100))/100.0
             if prob  <= self.probabilidade_mutacao(e, population):
                 # breakpoint()
-                new_indiv = Individuo(montar_solução_random=True, inp = self.inp)
-                if new_indiv < population.individuos[e]:
+                new_indiv = Individuo(montar_solução_random=True)
+                if random() <= 0.3 and population.individuos[e].rank != 1:
                     population.individuos[e] = new_indiv
+                else:
+                    if new_indiv < population.individuos[e]:
+                        population.individuos[e] = new_indiv
         return population
     
     def probabilidade_mutacao(self, idx, population):
@@ -161,9 +164,9 @@ class NSGA2Utils:
         return 0.5
         
     def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):
-        N = set(self.inp.N)
-        K = set(self.inp.K)
-        M = set(self.inp.M)
+        N = set(inp.N)
+        K = set(inp.K)
+        M = set(inp.M)
         for i, cromo in enumerate(child.cromossomos):
             cromo.set_genes(
                 gene_produtores=parent1.cromossomos[i].gene_produtores,
@@ -184,29 +187,29 @@ class NSGA2Utils:
                 
             self.apagar_rotas_OD(rotas_parent1)
             pontos_disponiveis = list(N | K)
-            for porto in self.inp.M:
-                if alocacao_destinos[porto - self.inp.range_port] > 0:
-                    alocacao_a_ser_distribuida = alocacao_destinos[porto - self.inp.range_port]
+            for porto in inp.M:
+                if alocacao_destinos[porto - inp.range_port] > 0:
+                    alocacao_a_ser_distribuida = alocacao_destinos[porto - inp.range_port]
                     while alocacao_a_ser_distribuida > 0:
                         ponto_mais_proximo = choice(pontos_disponiveis)
                         if ponto_mais_proximo in K:
-                            alocacao_ponto = alocacao_transbordos[ponto_mais_proximo - self.inp.range_trans]
+                            alocacao_ponto = alocacao_transbordos[ponto_mais_proximo - inp.range_trans]
                         elif ponto_mais_proximo in N:
                             alocacao_ponto = alocacao_origens[ponto_mais_proximo]
 
-                        if alocacao_destinos[porto - self.inp.range_port] <= alocacao_ponto:
-                            new_allocation = alocacao_destinos[porto - self.inp.range_port]
+                        if alocacao_destinos[porto - inp.range_port] <= alocacao_ponto:
+                            new_allocation = alocacao_destinos[porto - inp.range_port]
                         else:
-                            excess = alocacao_destinos[porto - self.inp.range_port] - alocacao_ponto
-                            new_allocation = alocacao_destinos[porto - self.inp.range_port] - excess
+                            excess = alocacao_destinos[porto - inp.range_port] - alocacao_ponto
+                            new_allocation = alocacao_destinos[porto - inp.range_port] - excess
                             
                         if ponto_mais_proximo in K:
-                            alocacao_transbordos[ponto_mais_proximo - self.inp.range_trans] -= new_allocation
+                            alocacao_transbordos[ponto_mais_proximo - inp.range_trans] -= new_allocation
                         elif ponto_mais_proximo in N:
                             alocacao_origens[ponto_mais_proximo] -= new_allocation
 
                         alocacao_a_ser_distribuida -= new_allocation
-                        alocacao_destinos[porto - self.inp.range_port] -= new_allocation
+                        alocacao_destinos[porto - inp.range_port] -= new_allocation
 
                         if alocacao_ponto == 0:
                             pontos_disponiveis.remove(ponto_mais_proximo)
@@ -246,10 +249,10 @@ class NSGA2Utils:
 
 
     def apagar_rotas_OD(self, rotas):
-        for node_ini in (self.inp.N + self.inp.K):
+        for node_ini in (inp.N + inp.K):
             if node_ini in rotas:
                 for node_fim in list(rotas[node_ini]):
-                    if node_fim in self.inp.M:
+                    if node_fim in inp.M:
                         del rotas[node_ini][node_fim]
                         
                         

@@ -1,11 +1,12 @@
 import numpy as np
 import random
-from defines import Defines
+# from defines import Defines
+import input as inp
 from typing import List, Dict, DefaultDict, Set
 from collections import defaultdict    
     
 class Cromossomo:
-    def __init__(self, inp) -> None:
+    def __init__(self) -> None:
         self.gene_produtores = np.zeros_like(inp.N)
         self.gene_transbordos = np.zeros_like(inp.M)
         self.gene_portos = np.zeros_like(inp.K)
@@ -21,15 +22,14 @@ class Cromossomo:
 
      
 class  Individuo:
-    def __init__(self, montar_solução_random: bool, inp: Defines) -> None:
-        self.inp = inp
+    def __init__(self, montar_solução_random: bool) -> None:
         self.produtores = inp.N
         self.portos = inp.M
         self.ferrovias = inp.K
-        self.demandas_clientes = inp.demandas_clientes.copy()
+        self.demandas_clientes = inp.demandas.copy()
         self.cromossomos = []
-        self.cap_destino = inp.capacidade_portos.copy()
-        self.cap_trans = inp.capacidade_ferrovias.copy()
+        self.cap_destino = inp.CP.copy()
+        self.cap_trans = inp.CF.copy()
         self.ofert_prod = inp.ofertas.copy()
         
         self.rank = None
@@ -41,7 +41,7 @@ class  Individuo:
         self.of = []
         self.fit = []
         for _ in range(len(self.demandas_clientes)):
-            self.cromossomos.append(Cromossomo(self.inp))
+            self.cromossomos.append(Cromossomo())
         
         if montar_solução_random:
             self.montar_solução_random() 
@@ -75,7 +75,7 @@ class  Individuo:
         vetor = np.zeros(quantidade_produtores)
         while demanda > 0:
             produtor = random.choice(np.where(ofertas - vetor > 0)[0])
-            aleatorio = random.randint(0, min(ofertas[produtor] - vetor[produtor], demanda))   
+            aleatorio = random.randint(0, int(min(ofertas[produtor] - vetor[int(produtor)], demanda)))   
             vetor[produtor] += aleatorio
             demanda -= aleatorio
         return vetor
@@ -93,11 +93,11 @@ class  Individuo:
                                                         possiveis_destinos=intermediarios + destinos, 
                                                         pontos_sem_capacidade=pontos_sem_capacidade)
                 if ponto_mais_proximo in intermediarios:
-                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_intermediarios[ponto_mais_proximo - self.inp.range_trans])
+                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_intermediarios[ponto_mais_proximo - inp.range_trans])
                     if demanda_alocar > 0:
                         gene_intermediario, alocacao_a_ser_distribuida = self.alocar_demanda(provider=produtor, 
                                                                                         target=ponto_mais_proximo, 
-                                                                                        range_point=[self.inp.range_trans],
+                                                                                        range_point=[inp.range_trans],
                                                                                         provider_allocation=aloc_prod, 
                                                                                         target_point_allocation=gene_intermediario, 
                                                                                         target_point_capacity=capacidade_intermediarios, 
@@ -106,11 +106,11 @@ class  Individuo:
                     else:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
                 else:
-                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_destino[ponto_mais_proximo - self.inp.range_port])
+                    demanda_alocar = min(alocacao_a_ser_distribuida, capacidade_destino[ponto_mais_proximo - inp.range_port])
                     if demanda_alocar > 0:
                         gene_destino, alocacao_a_ser_distribuida = self.alocar_demanda(provider=produtor, 
                                                                                   target=ponto_mais_proximo,  
-                                                                                  range_point=[self.inp.range_port],
+                                                                                  range_point=[inp.range_port],
                                                                                   provider_allocation=aloc_prod, 
                                                                                   target_point_allocation=gene_destino, 
                                                                                   target_point_capacity=capacidade_destino, 
@@ -126,16 +126,16 @@ class  Individuo:
         
         aloc_trans = gene_intermediario.copy()
         for transbordo in intermediarios:
-            if aloc_trans[transbordo - self.inp.range_trans] > 0:
-                alocacao_a_ser_distribuida = aloc_trans[transbordo - self.inp.range_trans]
+            if aloc_trans[transbordo - inp.range_trans] > 0:
+                alocacao_a_ser_distribuida = aloc_trans[transbordo - inp.range_trans]
                 while alocacao_a_ser_distribuida > 0:
                     ponto_mais_proximo = self.find_nearest_neighbor(ponto_referencia=transbordo, possiveis_destinos=destinos, 
                                                                pontos_sem_capacidade=pontos_sem_capacidade)
-                    gene_destino, alocacao_a_ser_distribuida = self.alocar_demanda(provider=transbordo, target=ponto_mais_proximo, range_point=[self.inp.range_trans, self.inp.range_port],
+                    gene_destino, alocacao_a_ser_distribuida = self.alocar_demanda(provider=transbordo, target=ponto_mais_proximo, range_point=[inp.range_trans, inp.range_port],
                                                                               provider_allocation=aloc_trans, target_point_allocation=gene_destino, 
                                                                               target_point_capacity=capacidade_destino, total_demanda=alocacao_a_ser_distribuida,
                                                                               cromossomo=cromossomo)
-                    if capacidade_destino[ponto_mais_proximo - self.inp.range_port] == 0:
+                    if capacidade_destino[ponto_mais_proximo - inp.range_port] == 0:
                         pontos_sem_capacidade.add(ponto_mais_proximo)
     
     
@@ -182,7 +182,7 @@ class  Individuo:
         pontos_sem_capacidade = set(pontos_sem_capacidade)
         vizinho_mais_proximo = float('inf')
         indice_vizinho_mais_proximo = None
-        for i, distancia in enumerate(self.inp.dist_matrix[ponto_referencia]):
+        for i, distancia in enumerate(inp.dist_matrix[ponto_referencia]):
             if i in possiveis_destinos and i not in pontos_sem_capacidade and distancia < vizinho_mais_proximo:
                 vizinho_mais_proximo = distancia
                 indice_vizinho_mais_proximo = i
@@ -191,22 +191,23 @@ class  Individuo:
         
 
     def calcular_custo_e_emissao_transporte(self, gene):
-        N = set(self.inp.N)
-        K = set(self.inp.K)
-        M = set(self.inp.M)
+        N = set(inp.N)
+        K = set(inp.K)
+        M = set(inp.M)
 
         custo_transporte = 0
         emissao_transporte = 0
         for node_ini, aresta in gene.lista_adjacencia.items():
             for node_fim, qtd_transportada in aresta.items():
                 if (node_ini in N and node_fim in K) or (node_ini in N and node_fim in M):
-                    custo_modal = self.inp.cr
-                    emissao_modal = self.inp.er
+                    custo_modal = inp.cr
+                    emissao_modal = inp.er
                 else:
-                    custo_modal = self.inp.cf
-                    emissao_modal = self.inp.ef
-                custo_transporte += qtd_transportada * self.inp.dist_matrix[node_ini][node_fim] * custo_modal
-                emissao_transporte += qtd_transportada * self.inp.tempo_matrix[node_ini][node_fim] * emissao_modal
+                    custo_modal = inp.cf
+                    emissao_modal = inp.ef
+                custo_transporte += qtd_transportada * inp.dist_matrix[node_ini][node_fim] * custo_modal
+                emissao_transporte += qtd_transportada * inp.tempo_matrix[node_ini, node_fim] * emissao_modal
+                # inp.tempo_matrix[node_ini][node_fim]
         return [custo_transporte, emissao_transporte]
 
 

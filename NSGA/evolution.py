@@ -1,9 +1,10 @@
 from utils_GA import NSGA2Utils
 from utils_GA import Individuo
 from population import Population
-from defines import Defines
+# from defines import Defines
+import input as inp
 from tqdm import tqdm
-from random import random
+import random
 import pandas as pd
 import numpy as np
 import time
@@ -14,6 +15,13 @@ def plot_frente_de_pareto(populacao, geracao, nome_instancia, iteracao):
     emissao_frente = np.array([populacao.fronts[0][i].of[1] for i in range(len(populacao.fronts[0]))])
     custo = np.array([populacao.fronts[i][j].of[0] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
     emissao = np.array([populacao.fronts[i][j].of[1] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
+    
+    # for i in range(1, len(populacao.fronts)):
+    #     for j in range(len(populacao.fronts[i])):
+    #         if random.random() < 0.4:
+    #             custo[i][j] += random.randint(1,500)
+    #             emissao[i][j] += random.randint(1,1000)
+            
     plt.scatter(emissao,custo,c=np.array(['#a6a6a6' for i in range(len(custo))]),label='Outras soluções')
     plt.scatter(emissao_frente, custo_frente, c=np.array(['#405a51' for i in range(len(custo_frente))]),label='Frente de pareto')
     plt.xlabel('Emissão de CO2')
@@ -27,11 +35,9 @@ def plot_frente_de_pareto(populacao, geracao, nome_instancia, iteracao):
 class Evolution:
 
     def __init__(self, nome_instancia, iteracao):
-        
-        self.inp = Defines(nome_instancia, iteracao)
         self.nome_instancia = nome_instancia
-        self.num_of_individuals = 80
-        self.utils = NSGA2Utils(self.num_of_individuals, self.inp)
+        self.num_of_individuals = 100
+        self.utils = NSGA2Utils(self.num_of_individuals, 0)
         self.population = None
 
     def evolve(self):
@@ -45,7 +51,7 @@ class Evolution:
         returned_population = None
         geracao = 0
         tempo_inicial = time.process_time()
-        while time.process_time() - tempo_inicial< 1200:
+        while time.process_time() - tempo_inicial< 7200:
             print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
 
             self.population.extend(children)
