@@ -90,20 +90,19 @@ class Gurobi:
         # self.port = random.randint(1, qtd_port)
         # self.cli = random.randint(1, qtd_cli)
 
-        # Custo do transporte                       
-        self.cr = 0.239
+        self.cr = inp.cr
 
         # Custo do transporte ferroviário
-        self.cf = 0.067
+        self.cf = inp.cf
 
         # Custo da multimodalidade
         self.ci = 0.04
 
         # Emissão do transporte rodoviário
-        self.er = 52.77 
+        self.er = inp.er
 
         # Emissão do transporte ferroviário
-        self.ef = 18.05
+        self.ef = inp.ef
 
         # Conjunto de armazéns produtores (N)
         self.N = inp.N

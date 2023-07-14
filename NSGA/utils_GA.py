@@ -150,11 +150,13 @@ class NSGA2Utils:
             if prob  <= self.probabilidade_mutacao(e, population):
                 # breakpoint()
                 new_indiv = Individuo(montar_solução_random=True)
-                if random() <= 0.3 and population.individuos[e].rank != 1:
+                if random() <= 0.3 and population.individuos[e].rank != 0:
                     population.individuos[e] = new_indiv
                 else:
                     if new_indiv < population.individuos[e]:
                         population.individuos[e] = new_indiv
+                # if new_indiv < population.individuos[e]:
+                #         population.individuos[e] = new_indiv
         return population
     
     def probabilidade_mutacao(self, idx, population):

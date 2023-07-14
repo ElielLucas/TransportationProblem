@@ -1,0 +1,47 @@
+(Pdb) front.fronts[0][0].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 1118.0}, 5: {7: 82.0}, 6: {11: 1118.0}, 7: {11: 82.0}})
+
+(Pdb) front.fronts[0][0].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 114.0}, 1: {8: 5.0}, 2: {8: 1.0}, 5: {7: 80.0}, 6: {11: 114.0}, 7: {11: 80.0}, 8: {11: 6.0}})
+
+(Pdb) front.fronts[0][1].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 1103.0}, 1: {8: 16.0}, 5: {7: 81.0}, 6: {11: 1103.0}, 7: {11: 81.0}, 8: {11: 16.0}})
+
+(Pdb) front.fronts[0][1].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 98.0}, 1: {8: 26.0}, 3: {6: 1.0}, 5: {7: 75.0}, 6: {11: 99.0}, 7: {11: 75.0}, 8: {11: 26.0}})
+
+(Pdb) front.fronts[0][2].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 1109.0}, 1: {8: 6.0}, 2: {8: 1.0}, 4: {9: 2.0}, 5: {7: 82.0}, 6: {11: 1109.0}, 7: {11: 82.0}, 8: {11: 7.0}, 9: {11: 2.0}})
+
+(Pdb) front.fronts[0][2].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 80.0}, 1: {8: 39.0}, 2: {8: 1.0}, 5: {7: 80.0}, 6: {11: 80.0}, 7: {11: 80.0}, 8: {11: 40.0}})
+
+(Pdb) front.fronts[0][3].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 1016.0}, 1: {8: 102.0}, 5: {7: 82.0}, 6: {11: 1016.0}, 7: {11: 82.0}, 8: {11: 102.0}})
+
+(Pdb) front.fronts[0][3].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 95.0}, 1: {8: 22.0}, 2: {8: 1.0}, 5: {7: 82.0}, 6: {11: 95.0}, 7: {11: 82.0}, 8: {11: 23.0}})
+
+(Pdb) front.fronts[0][4].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 1022.0}, 1: {8: 95.0}, 3: {6: 1.0}, 5: {7: 82.0}, 6: {11: 1023.0}, 7: {11: 82.0}, 8: {11: 95.0}})
+
+(Pdb) front.fronts[0][4].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {1: {8: 127.0}, 5: {7: 73.0}, 7: {11: 73.0}, 8: {11: 127.0}})
+
+(Pdb) front.fronts[0][5].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 920.0}, 1: {8: 199.0}, 5: {7: 81.0}, 6: {11: 920.0}, 7: {11: 81.0}, 8: {11: 199.0}})
+
+(Pdb) front.fronts[0][5].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 22.0}, 1: {8: 94.0}, 2: {8: 2.0}, 5: {7: 82.0}, 6: {11: 22.0}, 7: {11: 82.0}, 8: {11: 96.0}})
+
+(Pdb) front.fronts[0][6].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 855.0}, 1: {8: 272.0}, 3: {6: 4.0}, 5: {7: 69.0}, 6: {11: 859.0}, 7: {11: 69.0}, 8: {11: 272.0}})
+
+(Pdb) front.fronts[0][6].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 8.0}, 1: {8: 110.0}, 5: {7: 82.0}, 6: {11: 8.0}, 7: {11: 82.0}, 8: {11: 110.0}})
+
+(Pdb) front.fronts[0][7].cromossomos[0].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 842.0}, 1: {8: 268.0}, 3: {6: 6.0}, 4: {9: 2.0}, 5: {7: 82.0}, 6: {11: 848.0}, 7: {11: 82.0}, 8: {11: 268.0}, 9: {11: 2.0}})
+
+(Pdb) front.fronts[0][7].cromossomos[1].lista_adjacencia
+defaultdict(<class 'dict'>, {0: {6: 1.0}, 1: {8: 117.0}, 5: {7: 82.0}, 6: {11: 1.0}, 7: {11: 82.0}, 8: {11: 117.0}})

@@ -5,10 +5,11 @@ K = [6,7,8,9]
 M = [10,11]
 O = [12]
 ofertas = [1500.714, 275.486, 542.768, 383.352, 314.838, 82.057]
-demandas = [200]
+demandas = [1200, 200]
+demandas = [sum(demandas)]
 
 CF = [2169.451, 743811.6, 61984.3, 123968.6]
-CP = [17589.232, 1268.522]
+CP = [1268.522, 17589.232]
 quantidade_nodes = len(N) + len(K) + len(M)
 import numpy as np
 
@@ -93,12 +94,12 @@ tempo_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
 
 for i in N:
     for k in K:
-        velocidade_media = random.uniform(50, random.choice([60, 80]))
+        velocidade_media = random.uniform(40, random.choice([60, 80]))
         tempo = dist_orig_trans[i, k] / velocidade_media
         tempo_matrix[i, k] = tempo
     
     for m in M:
-        velocidade_media = random.uniform(50, random.choice([60, 80]))
+        velocidade_media = random.uniform(40, random.choice([60, 80]))
         tempo = dist_orig_porto[i, m] / velocidade_media
         tempo_matrix[i, m] = tempo
 
@@ -228,10 +229,10 @@ range_port = len(N) + len(K)
 range_client = len(N) + len(K) + len(M)
 
 
-cr = 0.239
+cr = 15.42
 
 # Custo do transporte ferroviário
-cf = 0.067
+cf = 7.03
 
 # Custo da multimodalidade
 ci = 0.04

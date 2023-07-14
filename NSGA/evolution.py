@@ -51,7 +51,7 @@ class Evolution:
         returned_population = None
         geracao = 0
         tempo_inicial = time.process_time()
-        while time.process_time() - tempo_inicial< 7200:
+        while time.process_time() - tempo_inicial< 900:
             print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
 
             self.population.extend(children)
@@ -61,7 +61,7 @@ class Evolution:
             self.population.calcula_dados()
             
             self.population = self.utils.mutate(self.population)
-            # if i % 20 == 0:
+            # if geracao % 20 == 0:
             #     random_individuals = []
             #     while len(random_individuals) < self.num_of_individuals:
             #         new_indiv = Individuo(montar_solução_random=True)
@@ -90,11 +90,11 @@ class Evolution:
                 #     break
             
             # breakpoint()
-            # self.utils.calculate_crowding_distance(self.population.fronts[front_num])
+            self.utils.calculate_crowding_distance(self.population.fronts[front_num])
             
-            # self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
+            self.population.fronts[front_num].sort(key=lambda individual: individual.crowding_distance, reverse=True)
             
-            # new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals - new_population.__len__()])
+            new_population.extend(self.population.fronts[front_num][0:self.num_of_individuals - new_population.__len__()])
             
             returned_population = self.population
             self.population = new_population
