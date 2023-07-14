@@ -1,8 +1,8 @@
 
-valor1 = 1.6006213e+07
-valor2 = 1.6447385e+07
+valor1 = 7961368.114762664
+valor2 =  8006494.366426644 
+# valor2 =  8006494.366426644 | 234833.63905934952 
 
-
-gap = ((valor1 - valor2)/valor1) * 100
+gap = ((valor2 - valor1)/valor1) * 100
 
 print(gap)
