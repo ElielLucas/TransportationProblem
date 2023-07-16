@@ -1,0 +1,236 @@
+Set parameter Username
+Academic license - for non-commercial use only - expires 2024-04-27
+Set parameter TimeLimit to value 540
+Set parameter Threads to value 1
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (linux64)
+
+CPU model: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz, instruction set [SSE2|AVX|AVX2|AVX512]
+Thread count: 4 physical cores, 8 logical processors, using up to 1 threads
+
+Optimize a model with 16 rows, 38 columns and 114 nonzeros
+Model fingerprint: 0xce7f7cae
+Variable types: 38 continuous, 0 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+01, 3e+04]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+03, 3e+06]
+
+---------------------------------------------------------------------------
+Multi-objectives: starting optimization with 2 objectives ... 
+---------------------------------------------------------------------------
+
+Multi-objectives: applying initial presolve ...
+---------------------------------------------------------------------------
+
+Presolve removed 11 rows and 0 columns
+Presolved: 5 rows and 38 columns
+---------------------------------------------------------------------------
+
+Multi-objectives: optimize objective 1 (Custo do transport) ...
+---------------------------------------------------------------------------
+
+Presolve removed 5 rows and 38 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    7.8350501e+06   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  7.835050100e+06
+---------------------------------------------------------------------------
+
+Multi-objectives: optimize objective 2 (Emissão do transp) ...
+---------------------------------------------------------------------------
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    5.9255719e+05   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  5.925571950e+05
+
+---------------------------------------------------------------------------
+Multi-objectives: solved in 0.00 seconds (0.00 work units), solution count 1
+
+---- 0 ---- 4.600000000021254e-06 s
+custo médio 10485728.681892004
+soma média de caminhos 890131.3881293081
+rank médio 31.62
+melhor rank 100000
+( 7845435.6934 | 593690.6763484909 ),
+-----------------
+---- 1 ---- 1.4585339 s
+custo médio 9572789.599922
+soma média de caminhos 787126.5931242144
+rank médio 32.98
+melhor rank 100000
+( 7845435.6934 | 593690.6763484909 ),
+-----------------
+---- 2 ---- 2.0320821000000002 s
+custo médio 9308320.598439997
+soma média de caminhos 756533.4912086945
+rank médio 32.49
+melhor rank 100000
+( 7845435.6934 | 593690.6763484909 ),
+-----------------
+---- 3 ---- 2.6615532 s
+custo médio 9013065.437956002
+soma média de caminhos 725264.9433478153
+rank médio 32.03
+melhor rank 100000
+( 7845435.6934 | 593690.6763484909 ),
+-----------------
+---- 4 ---- 3.2032201000000002 s
+custo médio 8901828.835665999
+soma média de caminhos 713589.1909478053
+rank médio 34.45
+melhor rank 100000
+( 7839010.5582 | 593042.6379962042 ),
+-----------------
+---- 5 ---- 3.8656816999999997 s
+custo médio 8832616.429454
+soma média de caminhos 704923.2154785624
+rank médio 34.89
+melhor rank 100000
+( 7839010.5582 | 593042.6379962042 ),
+-----------------
+---- 6 ---- 4.4285656 s
+custo médio 8905531.805113997
+soma média de caminhos 713170.8947841674
+rank médio 33.02
+melhor rank 100000
+( 7839010.5582 | 593042.6379962042 ),
+-----------------
+---- 7 ---- 4.9516817 s
+custo médio 8880882.874979997
+soma média de caminhos 709648.511440901
+rank médio 30.31
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 8 ---- 5.6405403000000005 s
+custo médio 8793954.343929999
+soma média de caminhos 700084.0617437513
+rank médio 30.51
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 9 ---- 6.239647000000001 s
+custo médio 8756071.744824
+soma média de caminhos 695747.7350953902
+rank médio 32.42
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 10 ---- 6.8463033 s
+custo médio 8697356.038978003
+soma média de caminhos 689235.9389258539
+rank médio 33.1
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 11 ---- 7.4273517 s
+custo médio 8660054.518704003
+soma média de caminhos 684429.7213216765
+rank médio 32.29
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 12 ---- 8.0253774 s
+custo médio 8687701.901872002
+soma média de caminhos 687133.1241542755
+rank médio 33.26
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 13 ---- 8.6304689 s
+custo médio 8628223.750823999
+soma média de caminhos 680425.8867670007
+rank médio 33.56
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 14 ---- 9.2371905 s
+custo médio 8619309.305892
+soma média de caminhos 679659.0574986095
+rank médio 36.74
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 15 ---- 9.840339799999999 s
+custo médio 8601328.8624
+soma média de caminhos 677365.8462314713
+rank médio 36.87
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 16 ---- 10.5690916 s
+custo médio 8612224.641536
+soma média de caminhos 678496.8416097072
+rank médio 35.66
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 17 ---- 11.2076295 s
+custo médio 8507803.834361998
+soma média de caminhos 667743.8549848668
+rank médio 34.78
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 18 ---- 11.7904892 s
+custo médio 8571312.21273
+soma média de caminhos 675150.5031335747
+rank médio 33.05
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 19 ---- 12.475478299999999 s
+custo médio 8580152.328212
+soma média de caminhos 676073.1815033231
+rank médio 31.91
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 20 ---- 13.0389209 s
+custo médio 8666674.410366
+soma média de caminhos 685852.0742746809
+rank médio 30.4
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 21 ---- 13.5817224 s
+custo médio 8547585.933491997
+soma média de caminhos 672693.455023791
+rank médio 28.89
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 22 ---- 14.2709261 s
+custo médio 8530074.628567996
+soma média de caminhos 670576.433337919
+rank médio 28.97
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 23 ---- 14.927156199999999 s
+custo médio 8494736.005177997
+soma média de caminhos 666786.5158488363
+rank médio 30.78
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 24 ---- 15.5617059 s
+custo médio 8518941.721581997
+soma média de caminhos 669118.7494625237
+rank médio 31.16
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------
+---- 25 ---- 16.154219599999998 s
+custo médio 8442419.406731999
+soma média de caminhos 660368.7393803421
+rank médio 30.34
+melhor rank 100000
+( 7835050.100000001 | 592557.1949775522 ),( 7835050.100000001 | 592557.1949775522 ),
+-----------------

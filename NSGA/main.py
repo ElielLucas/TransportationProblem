@@ -23,10 +23,8 @@ for i in range(10, 11):
     otmz = Evolution('caso_teste', i)
     front = otmz.evolve()
     texto = ''
-    # with open('rotas_resul_1.txt', 'w') as f:
-    #     pass
-    # arquivo.close()
-    arquivo = open("rotas_resul_2.txt", "a")
+
+    arquivo = open("rotas_resul_3.txt", "a")
     for cont, eita in enumerate(front.fronts[0]):
         arquivo.write("individuo_"+str(cont)+'\n')
         for k in range(1):
@@ -35,7 +33,6 @@ for i in range(10, 11):
             arquivo.write(json.dumps(d) + "\n")
     
     arquivo.close()
-    breakpoint()
 
 
 #     df = pd.DataFrame()

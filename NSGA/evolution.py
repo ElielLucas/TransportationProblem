@@ -60,7 +60,7 @@ class Evolution:
             
             self.population.calcula_dados()
             
-            self.population = self.utils.mutate(self.population)
+            # self.population = self.utils.mutate(self.population)
             # if geracao % 20 == 0:
             #     random_individuals = []
             #     while len(random_individuals) < self.num_of_individuals:
