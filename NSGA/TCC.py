@@ -130,14 +130,14 @@ f1 += sum(cf * dist_trans_porto[k, j] * X[k, j, o] for k in K for j in M for o i
 f1 += sum(cr * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
          
 # Função objetivo de minimização de emissão de CO2
-# f2 = sum(er * dist_orig_trans[i, k] * X[i, k, o] for i in N for k in K for o in O)
-# f2 += sum(ef * dist_trans_porto[k, j] * X[k, j, o] for k in K for j in M for o in O)
-# f2 += sum(er * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
+f2 = sum(er * dist_orig_trans[i, k] * X[i, k, o] for i in N for k in K for o in O)
+f2 += sum(ef * dist_trans_porto[k, j] * X[k, j, o] for k in K for j in M for o in O)
+f2 += sum(er * dist_orig_porto[i, j] * X[i, j, o] for i in N for j in M for o in O)
 
-m.setObjective(f1, gp.GRB.MINIMIZE)
+# m.setObjective(f1, gp.GRB.MINIMIZE)
 
-# m.setObjectiveN(f1, 0, priority=2, name="Custo do transporte")
-# m.setObjectiveN(f2, 1, priority=1, name="Emissão do transporte")
+m.setObjectiveN(f1, 0, priority=2, name="Custo do transporte")
+m.setObjectiveN(f2, 1, priority=1, name="Emissão do transporte")
 
 # Oferta dos produtores:
 for i in N:
