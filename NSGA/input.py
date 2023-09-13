@@ -13,11 +13,14 @@ quantidade_nodes = len(N) + len(K) + len(M)
 import numpy as np
 
 dist_orig_trans = {}
+# De cada origem para ela mesma
 dist_orig_trans[0, 0] = 999999
 dist_orig_trans[1, 1] = 999999
 dist_orig_trans[2, 2] = 999999
 dist_orig_trans[3, 3] = 999999
 dist_orig_trans[4, 4] = 999999
+
+# De cada origem para cada uma das outras origens
 dist_orig_trans[0, 1] = 999999
 dist_orig_trans[1, 0] = 999999
 dist_orig_trans[0, 2] = 999999
@@ -26,35 +29,56 @@ dist_orig_trans[0, 3] = 999999
 dist_orig_trans[3, 0] = 999999
 dist_orig_trans[0, 4] = 999999
 dist_orig_trans[4, 0] = 999999
-dist_orig_trans[0, 5] = 372
-dist_orig_trans[5, 0] = 372
-dist_orig_trans[0, 6] = 408
-dist_orig_trans[6, 0] = 408
+
+# De Aragarças para cada um dos transbordos
+dist_orig_trans[0, 5] = 408
+dist_orig_trans[5, 0] = 408
+dist_orig_trans[0, 6] = 372
+dist_orig_trans[6, 0] = 372
 dist_orig_trans[0, 7] = 523
 dist_orig_trans[7, 0] = 523
 dist_orig_trans[0, 8] = 588
 dist_orig_trans[8, 0] = 588
 
-# random.uniform(20, random.choice([60, 80]))
-dist_orig_trans[1, 5] = 392
-dist_orig_trans[1, 6] = 256
+# De Catalão para cada um dos transbordos
+dist_orig_trans[1, 5] = 256
+dist_orig_trans[5, 1] = 256
+dist_orig_trans[1, 6] = 392
+dist_orig_trans[6, 1] = 392
 dist_orig_trans[1, 7] = 367
+dist_orig_trans[7, 1] = 367
 dist_orig_trans[1, 8] = 62 
+dist_orig_trans[8, 1] = 62 
 
-dist_orig_trans[2, 5] = 499
-dist_orig_trans[2, 6] = 223
-dist_orig_trans[2, 7] = 548
+# De Cristalina para cada um dos transbordos
+dist_orig_trans[2, 5] = 223
+dist_orig_trans[5, 2] = 223
+dist_orig_trans[2, 6] = 499
+dist_orig_trans[6, 2] = 499
+dist_orig_trans[2, 7] = 550
+dist_orig_trans[7, 2] = 550
 dist_orig_trans[2, 8] = 173
+dist_orig_trans[8, 2] = 173
 
-dist_orig_trans[3, 5] = 654
-dist_orig_trans[3, 6] = 392
+# De Porangatu para cada um dos transbordos
+dist_orig_trans[3, 5] = 392
+dist_orig_trans[5, 3] = 392
+dist_orig_trans[3, 6] = 654
+dist_orig_trans[6, 3] = 654
 dist_orig_trans[3, 7] = 772
+dist_orig_trans[7, 3] = 772
 dist_orig_trans[3, 8] = 586
+dist_orig_trans[8, 3] = 586
 
-dist_orig_trans[4, 5] = 249
-dist_orig_trans[4, 6] = 57
+# De Goiânia para cada um dos transbordos
+dist_orig_trans[4, 5] = 57
+dist_orig_trans[5, 4] = 57
+dist_orig_trans[4, 6] = 249
+dist_orig_trans[6, 4] = 249
 dist_orig_trans[4, 7] = 367
+dist_orig_trans[7, 4] = 367
 dist_orig_trans[4, 8] = 204
+dist_orig_trans[8, 4] = 204
 
 
 dist_trans_porto = {}
