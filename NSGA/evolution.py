@@ -15,18 +15,17 @@ def plot_frente_de_pareto(populacao, geracao, nome_instancia, iteracao):
     emissao_frente = np.array([populacao.fronts[0][i].of[1] for i in range(len(populacao.fronts[0]))])
     custo = np.array([populacao.fronts[i][j].of[0] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
     emissao = np.array([populacao.fronts[i][j].of[1] for i in range(1, len(populacao.fronts)) for j in range(len(populacao.fronts[i]))])
-    
-    # for i in range(1, len(populacao.fronts)):
-    #     for j in range(len(populacao.fronts[i])):
-    #         if random.random() < 0.4:
-    #             custo[i][j] += random.randint(1,500)
-    #             emissao[i][j] += random.randint(1,1000)
             
+
     plt.scatter(emissao,custo,c=np.array(['#a6a6a6' for i in range(len(custo))]),label='Outras soluções')
     plt.scatter(emissao_frente, custo_frente, c=np.array(['#405a51' for i in range(len(custo_frente))]),label='Frente de pareto')
     plt.xlabel('Emissão de CO2')
     plt.ylabel('Custo do Transporte')
     plt.title('ANSGA II - Geração '+ str(geracao))
+
+    # plt.xticks([])
+    # plt.yticks([])
+    
     plt.legend()
     caminho = 'Figuras/' + nome_instancia + str(iteracao) + ' - Geração('+str(geracao)+').png'
     plt.savefig(caminho)
@@ -51,7 +50,8 @@ class Evolution:
         returned_population = None
         geracao = 0
         tempo_inicial = time.process_time()
-        while time.process_time() - tempo_inicial< 900:
+
+        while time.process_time() - tempo_inicial< 300:
             print('----', geracao, '----',time.process_time() - tempo_inicial,'s')
 
             self.population.extend(children)

@@ -6,33 +6,33 @@ K = [6,7,8,9]
 M = [10,11,12]
 O = [13]
 ofertas = [243138, 1253270, 755250, 354063, 143703, 1631300]
-demandas = [4240100]
-# 4380724
+demandas = [2240100]
+# 4240100
 # 223253
-CF = [355714, 2723934, 1101314, 199761]
-CP = [2353763, 1314217, 712743] #Aquiiiii
+CF = [2642735, 1068484, 193806, 345111]
+CP = [266483, 3983654, 100000] #Aquiiiii
 quantidade_nodes = len(N) + len(K) + len(M)
 
 dist_orig_trans = {}
 # De cada origem para ela mesma
-dist_orig_trans[0, 0] = 999999999999
-dist_orig_trans[1, 1] = 999999999999
-dist_orig_trans[2, 2] = 999999999999
-dist_orig_trans[3, 3] = 999999999999
-dist_orig_trans[4, 4] = 999999999999
-dist_orig_trans[5, 5] = 999999999999
+dist_orig_trans[0, 0] = 999999
+dist_orig_trans[1, 1] = 999999
+dist_orig_trans[2, 2] = 999999
+dist_orig_trans[3, 3] = 999999
+dist_orig_trans[4, 4] = 999999
+dist_orig_trans[5, 5] = 999999
 
 # De cada origem para cada uma das outras origens
-dist_orig_trans[0, 1] = 999999999999
-dist_orig_trans[1, 0] = 999999999999
-dist_orig_trans[0, 2] = 999999999999
-dist_orig_trans[2, 0] = 999999999999
-dist_orig_trans[0, 3] = 999999999999
-dist_orig_trans[3, 0] = 999999999999
-dist_orig_trans[0, 4] = 999999999999
-dist_orig_trans[4, 0] = 999999999999
-dist_orig_trans[0, 5] = 999999999999
-dist_orig_trans[5, 0] = 999999999999
+dist_orig_trans[0, 1] = 999999
+dist_orig_trans[1, 0] = 999999
+dist_orig_trans[0, 2] = 999999
+dist_orig_trans[2, 0] = 999999
+dist_orig_trans[0, 3] = 999999
+dist_orig_trans[3, 0] = 999999
+dist_orig_trans[0, 4] = 999999
+dist_orig_trans[4, 0] = 999999
+dist_orig_trans[0, 5] = 999999
+dist_orig_trans[5, 0] = 999999
 
 # De Aragarças para cada um dos transbordos
 dist_orig_trans[0, 6] = 408
@@ -85,7 +85,7 @@ dist_orig_trans[4, 9] = 204
 dist_orig_trans[9, 4] = 204
 
 # AQUIIII
-# De LEM para cada um dos transbordos
+# De Rio Verde para cada um dos transbordos
 dist_orig_trans[5, 6] = 691
 dist_orig_trans[6, 5] = 691
 dist_orig_trans[5, 7] = 977
@@ -171,7 +171,7 @@ dist_orig_porto[4, 12] = 1646
 dist_orig_porto[12, 4] = 1646
 
 # AQUIIII
-# De LEM para todos os portos
+# De Rio Verde para todos os portos
 dist_orig_porto[5, 10] = 1654
 dist_orig_porto[10, 5] = 1654
 dist_orig_porto[5, 11] = 1594
@@ -201,23 +201,23 @@ for k in K:
                 
 
 dist_matrix = np.full((quantidade_nodes, quantidade_nodes), np.inf)
-dist_matrix[0, 0] = 999999999999
-dist_matrix[1, 1] = 999999999999
-dist_matrix[2, 2] = 999999999999
-dist_matrix[3, 3] = 999999999999
-dist_matrix[4, 4] = 999999999999
-dist_matrix[5, 5] = 999999999999
+dist_matrix[0, 0] = 999999
+dist_matrix[1, 1] = 999999
+dist_matrix[2, 2] = 999999
+dist_matrix[3, 3] = 999999
+dist_matrix[4, 4] = 999999
+dist_matrix[5, 5] = 999999
 
-dist_matrix[0, 1] = 999999999999
-dist_matrix[1, 0] = 999999999999
-dist_matrix[0, 2] = 999999999999
-dist_matrix[2, 0] = 999999999999
-dist_matrix[0, 3] = 999999999999
-dist_matrix[3, 0] = 999999999999
-dist_matrix[0, 4] = 999999999999
-dist_matrix[4, 0] = 999999999999
-dist_matrix[0, 5] = 999999999999
-dist_matrix[5, 0] = 999999999999
+dist_matrix[0, 1] = 999999
+dist_matrix[1, 0] = 999999
+dist_matrix[0, 2] = 999999
+dist_matrix[2, 0] = 999999
+dist_matrix[0, 3] = 999999
+dist_matrix[3, 0] = 999999
+dist_matrix[0, 4] = 999999
+dist_matrix[4, 0] = 999999
+dist_matrix[0, 5] = 999999
+dist_matrix[5, 0] = 999999
 
 # De Aragarças para cada um dos transbordos
 dist_matrix[0, 6] = 408
