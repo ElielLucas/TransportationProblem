@@ -1,4 +1,4 @@
-import gurobipy as gp
+# import gurobipy as gp
 import numpy as np
 import math
 import random
@@ -10,62 +10,62 @@ class Gurobi:
     def __init__(self):
         self.criar_instancia()
         
-        # Criação do modelo
-        self.m = gp.Model("Transporte com Transbordo")
+        # # Criação do modelo
+        # self.m = gp.Model("Transporte com Transbordo")
 
-        # Definição das variáveis de decisão
-        X = self.m.addVars(self.N, self.K, self.O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod_Trans_Cliente")
-        X.update(self.m.addVars(self.K, self.M, self.O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Trans_Porto_Cliente"))
-        X.update(self.m.addVars(self.N, self.M, self.O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod_Porto_Cliente"))
+        # # Definição das variáveis de decisão
+        # X = self.m.addVars(self.N, self.K, self.O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod_Trans_Cliente")
+        # X.update(self.m.addVars(self.K, self.M, self.O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Trans_Porto_Cliente"))
+        # X.update(self.m.addVars(self.N, self.M, self.O, vtype=gp.GRB.CONTINUOUS, lb=0, name="X_Prod_Porto_Cliente"))
 
-        # Definição da função objetivo
-        # Função objetivo de custo do transporte
-        self.f1 = sum(self.cr * self.dist_orig_trans[i, k] * X[i, k, o] for i in self.N for k in self.K for o in self.O)
-        self.f1 += sum(self.cf * self.dist_trans_porto[k, j] * X[k, j, o] for k in self.K for j in self.M for o in self.O)
-        self.f1 += sum(self.cr * self.dist_orig_porto[i, j] * X[i, j, o] for i in self.N for j in self.M for o in self.O)
+        # # Definição da função objetivo
+        # # Função objetivo de custo do transporte
+        # self.f1 = sum(self.cr * self.dist_orig_trans[i, k] * X[i, k, o] for i in self.N for k in self.K for o in self.O)
+        # self.f1 += sum(self.cf * self.dist_trans_porto[k, j] * X[k, j, o] for k in self.K for j in self.M for o in self.O)
+        # self.f1 += sum(self.cr * self.dist_orig_porto[i, j] * X[i, j, o] for i in self.N for j in self.M for o in self.O)
                 
-        # Função objetivo de minimização de emissão de CO2
-        self.f2 = sum(self.er * inp.tempo_matrix[i, k] * X[i, k, o] for i in self.N for k in self.K for o in self.O)
-        self.f2 += sum(self.ef * inp.tempo_matrix[k, j] * X[k, j, o] for k in self.K for j in self.M for o in self.O)
-        self.f2 += sum(self.er * inp.tempo_matrix[i, j] * X[i, j, o] for i in self.N for j in self.M for o in self.O)
+        # # Função objetivo de minimização de emissão de CO2
+        # self.f2 = sum(self.er * inp.tempo_matrix[i, k] * X[i, k, o] for i in self.N for k in self.K for o in self.O)
+        # self.f2 += sum(self.ef * inp.tempo_matrix[k, j] * X[k, j, o] for k in self.K for j in self.M for o in self.O)
+        # self.f2 += sum(self.er * inp.tempo_matrix[i, j] * X[i, j, o] for i in self.N for j in self.M for o in self.O)
 
-        # Oferta dos produtores:
-        for i in self.N:
-            expr = sum([X[i, k, o] for k in self.K for o in self.O])
-            expr += sum([X[i, j, o] for j in self.M for o in self.O])
-            self.m.addConstr(expr <= self.ofertas[i], "Oferta_Prod_{}".format(i))
+        # # Oferta dos produtores:
+        # for i in self.N:
+        #     expr = sum([X[i, k, o] for k in self.K for o in self.O])
+        #     expr += sum([X[i, j, o] for j in self.M for o in self.O])
+        #     self.m.addConstr(expr <= self.ofertas[i], "Oferta_Prod_{}".format(i))
             
-        # Demanda dos clientes:
-        for o in self.O:
-            expr = sum([X[i, j, o] for i in self.N for j in self.M])
-            expr += sum([X[k, j, o] for k in self.K for j in self.M])
-            self.m.addConstr(expr == self.demandas[o - self.range_client], "Demanda_Cli_{}".format(o))
+        # # Demanda dos clientes:
+        # for o in self.O:
+        #     expr = sum([X[i, j, o] for i in self.N for j in self.M])
+        #     expr += sum([X[k, j, o] for k in self.K for j in self.M])
+        #     self.m.addConstr(expr == self.demandas[o - self.range_client], "Demanda_Cli_{}".format(o))
 
-        # Capacidade dos pontos ferroviários
-        for k in self.K:
-            expr = sum([X[i, k, o] for i in self.N for o in self.O])
-            self.m.addConstr(expr <= self.CF[k - self.range_trans], "Cap_Ferro_{}".format(k))
+        # # Capacidade dos pontos ferroviários
+        # for k in self.K:
+        #     expr = sum([X[i, k, o] for i in self.N for o in self.O])
+        #     self.m.addConstr(expr <= self.CF[k - self.range_trans], "Cap_Ferro_{}".format(k))
 
-        # Capacidade dos portos de navio
-        for j in self.M: 
-            expr = sum([X[i, j, o] for i in self.N for o in self.O])
-            expr += sum([X[k, j, o] for k in self.K for o in self.O])
-            self.m.addConstr(expr <= self.CP[j - self.range_port], "Cap_Porto_{}".format(j))
+        # # Capacidade dos portos de navio
+        # for j in self.M: 
+        #     expr = sum([X[i, j, o] for i in self.N for o in self.O])
+        #     expr += sum([X[k, j, o] for k in self.K for o in self.O])
+        #     self.m.addConstr(expr <= self.CP[j - self.range_port], "Cap_Porto_{}".format(j))
 
-        # Igualdade das quantidades
-        for k in self.K:
-            expr1 = sum([X[i, k, o] for i in self.N for o in self.O])
-            expr2 = sum([X[k, j, o] for j in self.M for o in self.O])
-            self.m.addConstr(expr1 == expr2), "Igualdade_{}".format(k)
-        # m.setObjective(f1, gp.GRB.MINIMIZE)
-        self.m.setObjectiveN(self.f1, 0, priority=2, name="Custo do transporte")
-        self.m.setObjectiveN(self.f2, 1, priority=1, name="Emissão do transporte")
-        # Atualização do modelo com novas variáveis
+        # # Igualdade das quantidades
+        # for k in self.K:
+        #     expr1 = sum([X[i, k, o] for i in self.N for o in self.O])
+        #     expr2 = sum([X[k, j, o] for j in self.M for o in self.O])
+        #     self.m.addConstr(expr1 == expr2), "Igualdade_{}".format(k)
+        # # m.setObjective(f1, gp.GRB.MINIMIZE)
+        # self.m.setObjectiveN(self.f1, 0, priority=2, name="Custo do transporte")
+        # self.m.setObjectiveN(self.f2, 1, priority=1, name="Emissão do transporte")
+        # # Atualização do modelo com novas variáveis
 
-        self.m.setParam('TimeLimit', 60*9)
-        self.m.setParam(gp.GRB.Param.Threads, 1)
+        # self.m.setParam('TimeLimit', 60*9)
+        # self.m.setParam(gp.GRB.Param.Threads, 1)
         
-        self.m.update()
+        # self.m.update()
         
     def otimizar(self):
         # Otimização do modelo
