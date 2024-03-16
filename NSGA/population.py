@@ -25,14 +25,14 @@ class Population:
         self.individuos.append(new_individual)
 
     def calcula_dados(self):
-        self.custo_medio = 0.0
-        self.emissao_media = 0.0
+        self.valor_medio = 0.0
+        self.peso_medio = 0.0
         self.rank_medio = 0.0
         for i in range(self.__len__()):
-            self.custo_medio += float(self.individuos[i].of[0])
-            self.emissao_media += float(self.individuos[i].of[1])
+            self.valor_medio += float(self.individuos[i].of[0])
+            self.peso_medio += float(self.individuos[i].of[1])
             self.rank_medio += self.individuos[i].rank
 
-        self.custo_medio /= float(self.__len__())
-        self.emissao_media /= float(self.__len__())
+        self.valor_medio /= float(self.__len__())
+        self.peso_medio /= float(self.__len__())
         self.rank_medio /= float(self.__len__())

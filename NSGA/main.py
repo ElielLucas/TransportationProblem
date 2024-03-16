@@ -1,26 +1,28 @@
 from modelo_gurobi import Gurobi
 from genetico import Evolution
+from random import random, randint
 import pandas as pd
 import json
+import input as inp
 
 nome = "Plot"
-list_resul = []
 
-df = pd.DataFrame()
-seila = Gurobi()
+num_itens = 4000
+valores_itens = [randint(10, 1000) for _ in range(num_itens)]
+pesos_itens = [randint(1, 50) for _ in range(num_itens)]
+# valores_itens = [1000, 2, 30, 400, 15]
+# pesos_itens = [200, 1, 10, 20, 50]
 
-# valor_f1, valor_f2 = seila.otimizar()
-# if valor_f1 != 0:
-#     df = df.append(
-#         {"Custo Transporte": valor_f1, "Emissão Transporte": valor_f2},
-#         ignore_index=True,
-#     )
+setup = {
+    "N_ITENS": num_itens,
+    "VALORES": valores_itens,
+    "PESOS": pesos_itens
+}
 
-# df.to_csv("resultados_" + nome + "_gurobi.csv")
+inp.setup = setup
 
-otmz = Evolution("Plot", 0)
+otmz = Evolution("Plot")
 front = otmz.evolve()
-texto = ""
 
 arquivo = open("rotas_resul_Plot.txt", "a")
 for cont, eita in enumerate(front.fronts[0]):

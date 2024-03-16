@@ -7,85 +7,65 @@ import input as inp
 import numpy as np
 
 class NSGA2Utils:
-    def __init__(self, num_of_individuals, inp):
+    def __init__(self, num_of_individuals):
         self.num_of_individuals = num_of_individuals
 
     def create_initial_population(self):
         population = Population()
         population.individuos = [
-            Individuo(montar_solução_random=True)
+            Individuo()
             for _ in range(self.num_of_individuals)
         ]
         return population
 
     def create_children(self, population):
-        prob = float(randint(1, 100)) / 100.0
+
         qtd = int(population.__len__())
         prole = []
         of_children = []
         population.calculate_of_population()
+        # breakpoint()
         while qtd > 0:
             parent1 = self.tournament(population=population)
             parent2 = self.tournament(adv=parent1, population=population)
-            # if prob <= self.probabilidade_crossover(parent1, parent2, population):
-            if random() <= 0.6:
-                indiv_aleatorio = Individuo(montar_solução_random=True)
-                if choice([0, 1]) == 0:
-                    child1, child2 = self.crossover(
-                        parent1=population.individuos[parent1], parent2=indiv_aleatorio
-                    )
-                else:
-                    child1, child2 = self.crossover(
-                        parent1=population.individuos[parent2], parent2=indiv_aleatorio
-                    )
-            else:
-                child1, child2 = self.crossover(
-                    parent1=population.individuos[parent1],
-                    parent2=population.individuos[parent2],
-                )
+       
+            child1, child2 = self.crossover(
+                parent1=population.individuos[parent1],
+                parent2=population.individuos[parent2],
+            )
 
             child1.calculate_objectives()
             child2.calculate_objectives()
 
-            if (
-                child1.of not in population.of_population
-                and child1.of not in of_children
-            ):
-                prole.append(child1)
-                of_children.append(child1.of)
-                qtd -= 1
-            if (
-                child2.of not in population.of_population
-                and child2.of not in of_children
-            ):
-                prole.append(child2)
-                of_children.append(child2.of)
-                qtd -= 1
+            prole.append(child1)
+            of_children.append(child1.of)
+            prole.append(child2)
+            of_children.append(child2.of)
+
+            qtd -= 2
 
         return prole
 
     def tournament(self, adv=-1, population=None):
-        lim = population.__len__()
-        ret = randint(0, lim - 1)
+        limite = population.__len__()
+        retorno = randint(0, limite - 1)
+
         for _ in range(0, 3):
-            other = randint(0, lim - 1)
-            while other == adv or other == ret:
-                other = randint(0, lim - 1)
-            if population.individuos[other] < population.individuos[ret]:
-                ret = other
-            elif population.individuos[ret] < population.individuos[other]:
-                ret = ret
-            else:
+            other = randint(0, limite - 1)
+            while other == adv or other == retorno:
+                other = randint(0, limite - 1)
+            if population.individuos[other] < population.individuos[retorno]:
+                retorno = other
+            elif population.individuos[retorno] == population.individuos[other]:
                 if (
                     population.individuos[other].crowding_distance
-                    < population.individuos[ret].crowding_distance
+                    < population.individuos[retorno].crowding_distance
                 ):
-                    ret = other
+                    retorno = other
 
-        return ret
+        return retorno
 
-    def probabilidade_crossover(self, idx1, idx2, population):
-        idx = idx1
+    def probabilidade_crossover(self, idx, population):
         if population.individuos[idx].rank > population.rank_medio:
             return (population.rank_medio - population.melhor_rank) / (
                 population.individuos[idx].rank - population.melhor_rank
@@ -156,18 +136,18 @@ class NSGA2Utils:
                     ) / scale
 
     def crossover(self, parent1, parent2):
-        child1 = Individuo(montar_solução_random=False)
-        child2 = Individuo(montar_solução_random=False)
-        self.montar_rotas_faltantes_1(child1, parent1, parent2)
-        self.montar_rotas_faltantes_1(child2, parent2, parent1)
-        return child1, child2
+        crossover_point = randint(1, parent1.num_itens - 2)
+
+        parent1.itens_escolhidos = parent1.itens_escolhidos[:crossover_point] + parent2.itens_escolhidos[crossover_point:]
+        parent2.itens_escolhidos = parent2.itens_escolhidos[:crossover_point] + parent1.itens_escolhidos[crossover_point:]
+
+        return (parent1, parent2)
 
     def mutate(self, population):
         for e in range(population.__len__()):
-            prob = float(randint(1, 100)) / 100.0
-            if prob <= self.probabilidade_mutacao(e, population):
-                new_indiv = Individuo(montar_solução_random=True)
-                if random() <= 0.3 and population.individuos[e].rank != 0:
+            if self.probabilidade_mutacao(e, population) >= 0.2:
+                new_indiv = Individuo()
+                if population.individuos[e].rank != 0:
                     population.individuos[e] = new_indiv
                 else:
                     if new_indiv < population.individuos[e]:
@@ -187,71 +167,6 @@ class NSGA2Utils:
 
         return 0.5
 
-    def montar_rotas_faltantes_1(self, child: Individuo, parent1, parent2):
-        N = set(inp.N)
-        K = set(inp.K)
-        M = set(inp.M)
-        for i, cromo in enumerate(child.cromossomos):
-            cromo.set_genes(
-                gene_produtores=parent1.cromossomos[i].gene_produtores,
-                gene_transbordos=parent1.cromossomos[i].gene_transbordos,
-                gene_portos=parent2.cromossomos[i].gene_portos,
-            )
-
-            rotas_parent1 = parent1.cromossomos[i].lista_adjacencia
-
-            alocacao_destinos = cromo.gene_portos.copy()
-            alocacao_transbordos = cromo.gene_transbordos.copy()
-            alocacao_origens = cromo.gene_produtores.copy()
-
-            for node_ini, aresta in rotas_parent1.items():
-                for node_fim, custo in aresta.items():
-                    if node_ini in N and node_fim in K:
-                        alocacao_origens[node_ini] -= custo
-
-            self.apagar_rotas_OD(rotas_parent1)
-            pontos_disponiveis = list(N | K)
-            for porto in inp.M:
-                if alocacao_destinos[porto - inp.range_port] > 0:
-                    alocacao_a_ser_distribuida = alocacao_destinos[
-                        porto - inp.range_port
-                    ]
-                    while alocacao_a_ser_distribuida > 0:
-                        ponto_mais_proximo = choice(pontos_disponiveis)
-                        if ponto_mais_proximo in K:
-                            alocacao_ponto = alocacao_transbordos[
-                                ponto_mais_proximo - inp.range_trans
-                            ]
-                        elif ponto_mais_proximo in N:
-                            alocacao_ponto = alocacao_origens[ponto_mais_proximo]
-
-                        if alocacao_destinos[porto - inp.range_port] <= alocacao_ponto:
-                            new_allocation = alocacao_destinos[porto - inp.range_port]
-                        else:
-                            excess = (
-                                alocacao_destinos[porto - inp.range_port]
-                                - alocacao_ponto
-                            )
-                            new_allocation = (
-                                alocacao_destinos[porto - inp.range_port] - excess
-                            )
-
-                        if ponto_mais_proximo in K:
-                            alocacao_transbordos[
-                                ponto_mais_proximo - inp.range_trans
-                            ] -= new_allocation
-                        elif ponto_mais_proximo in N:
-                            alocacao_origens[ponto_mais_proximo] -= new_allocation
-
-                        alocacao_a_ser_distribuida -= new_allocation
-                        alocacao_destinos[porto - inp.range_port] -= new_allocation
-
-                        if alocacao_ponto == 0:
-                            pontos_disponiveis.remove(ponto_mais_proximo)
-
-                        if new_allocation > 0:
-                            rotas_parent1[ponto_mais_proximo][porto] = new_allocation
-            cromo.lista_adjacencia = rotas_parent1
 
     def get_fit(self, populacao):
         fit = [individuo.valor_fit for individuo in populacao]
@@ -279,10 +194,3 @@ class NSGA2Utils:
             new_fit.append(fit[SORT_POSITIONS[i]])
 
         return new_population, new_of, new_fit
-
-    def apagar_rotas_OD(self, rotas):
-        for node_ini in inp.N + inp.K:
-            if node_ini in rotas:
-                for node_fim in list(rotas[node_ini]):
-                    if node_fim in inp.M:
-                        del rotas[node_ini][node_fim]
