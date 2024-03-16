@@ -19,7 +19,6 @@ class NSGA2Utils:
         return population
 
     def create_children(self, population):
-        prob = float(randint(1, 100)) / 100.0
         qtd = int(population.__len__())
         prole = []
         of_children = []
@@ -27,18 +26,7 @@ class NSGA2Utils:
         while qtd > 0:
             parent1 = self.tournament(population=population)
             parent2 = self.tournament(adv=parent1, population=population)
-            # if prob <= self.probabilidade_crossover(parent1, parent2, population):
-            if random() <= 0.6:
-                indiv_aleatorio = Individuo(montar_solução_random=True)
-                if choice([0, 1]) == 0:
-                    child1, child2 = self.crossover(
-                        parent1=population.individuos[parent1], parent2=indiv_aleatorio
-                    )
-                else:
-                    child1, child2 = self.crossover(
-                        parent1=population.individuos[parent2], parent2=indiv_aleatorio
-                    )
-            else:
+            if self.probabilidade_crossover(parent1, parent2, population) >= 0.6:
                 child1, child2 = self.crossover(
                     parent1=population.individuos[parent1],
                     parent2=population.individuos[parent2],
@@ -46,7 +34,7 @@ class NSGA2Utils:
 
             child1.calculate_objectives()
             child2.calculate_objectives()
-
+            
             if (
                 child1.of not in population.of_population
                 and child1.of not in of_children
@@ -102,7 +90,7 @@ class NSGA2Utils:
         ):
             return 1
         else:
-            return -1
+            return 0
 
     def choose_with_prob(self, prob):
         if random() <= prob:
@@ -164,8 +152,7 @@ class NSGA2Utils:
 
     def mutate(self, population):
         for e in range(population.__len__()):
-            prob = float(randint(1, 100)) / 100.0
-            if prob <= self.probabilidade_mutacao(e, population):
+            if self.probabilidade_mutacao(e, population) >= 0.2:
                 new_indiv = Individuo(montar_solução_random=True)
                 if random() <= 0.3 and population.individuos[e].rank != 0:
                     population.individuos[e] = new_indiv

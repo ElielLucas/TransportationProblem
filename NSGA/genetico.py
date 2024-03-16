@@ -93,12 +93,16 @@ class Evolution:
             new_population = Population()
             front_num = 0
 
-            while (new_population.__len__() + len(self.population.fronts[front_num]) <= self.num_of_individuals):
-                self.utils.calculate_crowding_distance(
-                    self.population.fronts[front_num]
-                )
-                new_population.extend(self.population.fronts[front_num])
-                front_num += 1
+            while ((new_population.__len__() + len(self.population.fronts[front_num])) <= self.num_of_individuals):
+                if front_num < len(self.population.fronts):
+                    self.utils.calculate_crowding_distance(
+                        self.population.fronts[front_num]
+                    )
+                    new_population.extend(self.population.fronts[front_num])
+                    front_num += 1
+
+                    if front_num >= len(self.population.fronts):
+                        front_num -= 1
 
             self.utils.calculate_crowding_distance(self.population.fronts[front_num])
 
